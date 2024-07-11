@@ -123,7 +123,8 @@
 
             <p>Day Name</p>
             <input type="text" v-model="Wdays.title" placeholder="Title...">
-            <div v-for="(workouts, index), newWorkout">
+            
+            <div v-for="(workouts, index) in newWorkout">
               <input type="text" v-model="searchInput">
               <select v-model="workouts.work">
                 <option v-for=" workout in filteredWorkouts" v-bind:value="workout._id">
