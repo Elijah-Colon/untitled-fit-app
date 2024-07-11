@@ -81,7 +81,7 @@ app.get("/workouts", async (request, response) => {
   try {
     let workout = await model.Workout.find();
     response.send(workout);
-    console.log(workout);
+    // console.log(workout);
   } catch (error) {
     console.log(error);
     response.status(500).send("Generic error");
@@ -99,14 +99,14 @@ app.put("/days/:id", AuthMiddleware, async function (request, response) {
       owner: request.session.userID,
     }).populate("owner", "-password");
 
-    console.log(day);
+    // console.log(day);
     if (!day) {
       response.status(404).send("Could not find that workout");
       return;
     }
-    console.log(request.session._id, day.owner);
+    // console.log(request.session._id, day.owner);
     if (request.userID.toString() !== day.owner.toString()) {
-      console.log("miau");
+      // console.log("miau");
       day.name = request.body.name;
       day.workouts = request.body.workouts;
     }
@@ -140,9 +140,9 @@ app.delete("/days/:id", AuthMiddleware, async function (request, response) {
 
 app.get("/days/:daysid", async function (req, res) {
   try {
-    console.log(req.params.daysid);
+    // console.log(req.params.daysid);
     let day = await model.Day.findOne({ _id: req.params.daysid });
-    console.log(day);
+    // console.log(day);
     if (!day) {
       console.log("Day not found");
       res.status(404).send("day not found");
@@ -165,7 +165,7 @@ app.get("/days", async function (request, response) {
       return response.status(404).send("Could not find that workout");
     }
     response.json(day);
-    console.log(day);
+    // console.log(day);
   } catch (error) {
     console.log(error);
     response.status(500).send(error);
@@ -210,18 +210,25 @@ app.delete("/session", function (request, response) {
 });
 
 app.post("/session", async (request, response) => {
+  console.log("1");
   try {
     let user = await model.User.findOne({ email: request.body.email });
+    console.log("2");
     if (!user) {
+      console.log("3");
       return response.status(401).send("Authentication failed");
     }
     let isGoodPassword = await user.verifyPassword(request.body.password);
+    console.log("4");
     if (!isGoodPassword) {
+      console.log("%");
       return response.status(401).send("Authentication failed");
     }
     request.session.userID = user._id;
     request.session.name = user.name;
-    response.status(204).send(request.session);
+    // console.log("request session", request.session);
+
+    response.status(201).send(request.session);
   } catch (error) {
     response.status(500);
     console.log(error);
@@ -238,7 +245,7 @@ app.put("/weeks/:id", AuthMiddleware, async function (request, response) {
       _id: request.params.id,
       owner: request.session.userID,
     }).populate("owner", "-password");
-    console.log(week);
+    // console.log(week);
     if (!week) {
       response.status(404).send("could not find that workout");
       return;
@@ -269,7 +276,7 @@ app.get("/weeks", async function (req, res) {
       .populate("owner", "-password")
       .populate("days")
       .populate({ path: "days", populate: { path: "workouts" } });
-    console.log(week);
+    // console.log(week);
     if (!week) {
       res.status(404).send("Weeks not found");
       return;
@@ -316,7 +323,7 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
       _id: req.params.weekID,
       owner: req.session.userID,
     });
-    console.log(isDeleted);
+    // console.log(isDeleted);
     if (!isDeleted) {
       res.status(404).send("Week not found");
       return;
@@ -330,9 +337,9 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
 
 app.get("/weeks/:weeksid", async function (res, req) {
   try {
-    console.log(req.params.weekid);
+    // console.log(req.params.weekid);
     let week = await model.Week.Findone({ _id: req.params.weekid });
-    console.log(week);
+    // console.log(week);
     if (!week) {
       console.log("week not found");
       res.status(404).send("week not found");
