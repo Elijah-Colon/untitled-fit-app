@@ -38,7 +38,7 @@
         </div>
         <div
           class="Browse"
-          v-if="sort === 'day'"
+          v-if="sort === 'week'"
           v-for="(workout,index) in filteredWeeks"
         >
           <div>{{workout.name}}</div>
@@ -110,9 +110,32 @@
         <button @click="createDay()">Create</button>
         <button @click="setPage('create')">Back</button>
       </div>
+      
       <div v-if="currentPage === 'Cweek'">
+       
         <button @click="setPage('create')">Back</button>
-      </div>
+
+        <h3>Create week</h3>
+        <p>title</p>
+        <input type="text" placeholder="title" v-model="newWeek.title">
+        
+          <div v-for="(day,index) in Wdays">
+
+            <p>Day Name</p>
+            <input type="text" v-model="Wdays.title" placeholder="Title...">
+            <div v-for="(workouts, index), newWorkout">
+              <input type="text" v-model="searchInput">
+              <select v-model="workouts.work">
+                <option v-for=" workout in filteredWorkouts" v-bind:value="workout._id">
+                  {{workout.name}}
+                </option>
+              </select>
+              <button @click="addworkout()">add workout</button>
+            </div>
+
+          </div>
+          <button @click="addDay()">Add Day</button>
+        </div>
     </div>
     <script src="app.js"></script>
   </body>

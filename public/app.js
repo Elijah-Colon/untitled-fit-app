@@ -23,6 +23,19 @@ Vue.createApp({
         },
       ],
       sort: "",
+// -----------------
+      newWeek:{
+        title:"",
+        days:[]
+      },
+
+      Wdays:[
+        {
+          title: "",
+          workouts: [],
+        }
+      ],
+
     };
   },
   methods: {
@@ -52,6 +65,17 @@ Vue.createApp({
       this.weeks = data;
       console.log(data);
       console.log("hello");
+    },
+    addDay: function() {
+      this.Wdays.push({
+        title: "",
+        workouts: [],
+      });
+    },
+    makeWorkout: function (index){
+      this.Wdays[index].workouts.push({
+        work:""
+      })
     },
     // Page switch
     setPage: function (page) {
