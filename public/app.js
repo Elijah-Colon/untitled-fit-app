@@ -22,6 +22,7 @@ Vue.createApp({
           work: "",
         },
       ],
+      sort: "",
     };
   },
   methods: {
@@ -154,6 +155,9 @@ Vue.createApp({
         this.currentPage = "login";
         this.currentUser = null;
       }
+    },
+    sortWorkouts: function (sort) {
+      this.sort = sort;
     },
   },
   computed: {

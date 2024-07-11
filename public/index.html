@@ -29,7 +29,18 @@
           <hr />
         </div>
 
-        <div class="Browse" v-for="(workout, index) in filteredWorkouts">
+        <div
+          class="Browse"
+          v-if="sort === 'day'"
+          v-for="(workout, index) in filteredDays"
+        >
+          <div>{{workout.name}}</div>
+        </div>
+        <div
+          class="Browse"
+          v-if="sort === 'day'"
+          v-for="(workout,index) in filteredWeeks"
+        >
           <div>{{workout.name}}</div>
         </div>
       </div>
