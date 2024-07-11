@@ -13,7 +13,8 @@
         <h1>Untitled Fit App</h1>
         <p @click="setPage('Browse')">Browse</p>
         <p @click="setPage('create')">Create</p>
-        <p @click="setPage('aboutUs')">About us</p>
+        <p @click="setPage('aboutUs')">About</p>
+        <p @click="setPage('personal')">Mine</p>
         <!-- want to change this when ready -->
         <button @click="setPage('login')" v-if="currentPage != 'login'">
           Login
@@ -94,7 +95,7 @@
       <div v-if="currentPage ==='aboutUs'"></div>
       <div v-if="currentPage === 'Cday'">
         <p>Title</p>
-        <input type="text" placeholder="title" v-model="newDay.title" />
+        <input type="text" placeholder="title" v-model="newDay.name" />
         <p>Wokouts</p>
         <div v-for="(workouts, index) in newWorkout">
           <input type="text" v-model="searchInput" />
@@ -119,6 +120,10 @@
       <div v-if="currentPage === 'singleWeek'">
         <button @click="currentPage = 'Browse'">Back</button>
         <!-- <div class="day-in-week" v-for="day in week.days">{{day}}</div> -->
+      <div v-if="currentPage === 'personal'">
+        <div v-for="(workout,index)  in filteredDays">
+          <div v-if="workout.owner._id === user.userID">{{workout.name}}</div>
+        </div>
       </div>
     </div>
     <script src="app.js"></script>

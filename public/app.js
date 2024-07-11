@@ -13,8 +13,9 @@ Vue.createApp({
         password: "",
       },
       searchInput: "",
+
       newDay: {
-        title: "",
+        name: "",
         workouts: [],
       },
       newWorkout: [
@@ -43,7 +44,6 @@ Vue.createApp({
       let data = await response.json();
       this.days = data;
       console.log(data);
-      console.log("hello");
     },
     // Weeks
     getWeeks: async function () {
@@ -71,13 +71,18 @@ Vue.createApp({
     createDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      this.newDay.workouts = this.newWorkout;
+
+      this.newWorkout.forEach((element) => {
+        console.log(element);
+        this.newDay.workouts.push(element.work);
+      });
       let requestOptions = {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(this.newDay),
       };
       let response = await fetch(`${URL}/days`, requestOptions);
+      console.log(response);
       if (response.status === 201) {
         this.getDays();
         this.clearday();
@@ -89,7 +94,7 @@ Vue.createApp({
     },
     clearday: function () {
       this.newDay = {
-        title: "",
+        name: "",
         workouts: [],
       };
     },
