@@ -335,10 +335,10 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
   }
 });
 
-app.get("/weeks/:weeksid", async function (res, req) {
+app.get("/weeks/:weeksid", async function (req, res) {
   try {
     // console.log(req.params.weekid);
-    let week = await model.Week.Findone({ _id: req.params.weekid });
+    let week = await model.Week.findOne({ _id: req.params.weekid });
     // console.log(week);
     if (!week) {
       console.log("week not found");
