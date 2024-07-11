@@ -38,9 +38,11 @@
         </div>
         <div
           class="Browse"
-          v-if="sort === 'day'"
+          v-if="sort === 'week'"
           v-for="(workout,index) in filteredWeeks"
+          @click="openWeek(workout._id)"
         >
+          <div>{{workout._id}}</div>
           <div>{{workout.name}}</div>
         </div>
       </div>
@@ -112,6 +114,11 @@
       </div>
       <div v-if="currentPage === 'Cweek'">
         <button @click="setPage('create')">Back</button>
+      </div>
+
+      <div v-if="currentPage === 'singleWeek'">
+        <button @click="currentPage = 'Browse'">Back</button>
+        <!-- <div class="day-in-week" v-for="day in week.days">{{day}}</div> -->
       </div>
     </div>
     <script src="app.js"></script>

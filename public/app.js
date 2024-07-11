@@ -23,6 +23,7 @@ Vue.createApp({
         },
       ],
       sort: "",
+      currentWeek: [],
     };
   },
   methods: {
@@ -53,6 +54,7 @@ Vue.createApp({
       console.log(data);
       console.log("hello");
     },
+
     // Page switch
     setPage: function (page) {
       this.currentPage = page;
@@ -158,6 +160,15 @@ Vue.createApp({
     },
     sortWorkouts: function (sort) {
       this.sort = sort;
+    },
+
+    // open week view
+    openWeek: async function (weekID) {
+      let response = await fetch(`${URL}/weeks/${weekID}`);
+      let data = await response.json;
+      this.currentWeek = data[0];
+      this.currentPage = "singleWeek";
+      console.log(data);
     },
   },
   computed: {
