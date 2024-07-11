@@ -228,7 +228,7 @@ app.post("/session", async (request, response) => {
     request.session.name = user.name;
     // console.log("request session", request.session);
 
-    response.status(204).json({ miau: "miau" });
+    response.status(201).send(request.session);
   } catch (error) {
     response.status(500);
     console.log(error);
