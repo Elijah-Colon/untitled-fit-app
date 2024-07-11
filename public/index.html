@@ -11,15 +11,17 @@
     <div id="app">
       <nav>
         <h1>Untitled Fit App</h1>
-        <p>Browse</p>
-        <p>Create</p>
-        <p>About us</p>
-
-        <button @click="setPage('login')">Login</button>
+        <p @click="setPage('Browse')">Browse</p>
+        <p @click="setPage('create')">Create</p>
+        <p @click="setPage('aboutUs')">About us</p>
+        <!-- want to change this when ready -->
+        <button @click="setPage('login')" v-if="currentPage != 'login'">
+          Login
+        </button>
       </nav>
       <div v-if="currentPage === 'Browse'">
         <div class="search">
-          <input type="search" placeholder="search...." />
+          <input type="search" placeholder="search...." v-model="searchInput" />
           <div>
             <button @click="sortWorkouts('day')">Days</button>
             <button @click="sortWorkouts('week')">Weeks</button>
@@ -27,7 +29,9 @@
           <hr />
         </div>
 
-        <div class="Browse"></div>
+        <div class="Browse" v-for="(workout, index) in filteredWorkouts">
+          <div>{{workout.name}}</div>
+        </div>
       </div>
       <div v-if="currentPage === 'login'">
         <form @submit.prevent="loginUser()">
@@ -69,6 +73,34 @@
             <span @click="setPage('login')">Log in</span>
           </p>
         </form>
+      </div>
+      <div v-if="currentPage === 'create'">
+        <button @click="setPage('Cday')">Create a day</button>
+        <button @click="setPage('Cweek')">Create a Week</button>
+      </div>
+      <div v-if="currentPage ==='aboutUs'"></div>
+      <div v-if="currentPage === 'Cday'">
+        <p>Title</p>
+        <input type="text" placeholder="title" v-model="newDay.title" />
+        <p>Wokouts</p>
+        <div v-for="(workouts, index) in newWorkout">
+          <input type="text" v-model="searchInput" />
+          <select v-model="workouts.work">
+            <option
+              v-for="workout in filteredWorkouts"
+              v-bind:value="workout._id"
+            >
+              {{workout.name}}
+            </option>
+          </select>
+          <button @click="removeWorkout(index)">remove</button>
+        </div>
+        <button @click="addworkout()">add workout</button>
+        <button @click="createDay()">Create</button>
+        <button @click="setPage('create')">Back</button>
+      </div>
+      <div v-if="currentPage === 'Cweek'">
+        <button @click="setPage('create')">Back</button>
       </div>
     </div>
     <script src="app.js"></script>
