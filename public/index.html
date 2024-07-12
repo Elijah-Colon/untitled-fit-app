@@ -117,12 +117,12 @@
 
         <h3>Create week</h3>
         <p>title</p>
-        <input type="text" placeholder="title" v-model="newWeek.title">
+        <input type="text" placeholder="title" v-model="newWeek.name">
         
           <div v-for="(day,index) in Wdays">
 
             <p>Day Name</p>
-            <input type="text" v-model="Wdays.title" placeholder="Title...">
+            <input type="text" v-model="Wdays.name" placeholder="Title...">
             
             <div v-for="(workouts, index) in newWorkout">
               <input type="text" v-model="searchInput">
@@ -137,7 +137,7 @@
           </div>
           <button @click="addDay()">Add Day</button>
         </div>
-    </div>
+    </div> 
     <script src="app.js"></script>
   </body>
 </html>

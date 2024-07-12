@@ -25,13 +25,13 @@ Vue.createApp({
       sort: "",
 // -----------------
       newWeek:{
-        title:"",
+        name:"",
         days:[]
       },
 
       Wdays:[
         {
-          title: "",
+          name: "",
           workouts: [],
         }
       ],
@@ -68,7 +68,7 @@ Vue.createApp({
     },
     addDay: function() {
       this.Wdays.push({
-        title: "",
+        name: "",
         workouts: [],
       });
     },
