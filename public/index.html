@@ -11,12 +11,12 @@
     <div id="app">
       <nav>
         <h1>Untitled Fit App</h1>
-        <p @click="setPage('Browse')">Browse</p>
-        <p @click="setPage('create')">Create</p>
-        <p @click="setPage('aboutUs')">About</p>
-        <p @click="setPage('personal')">Mine</p>
+        <p class="navButton" @click="setPage('Browse')">Browse</p>
+        <p class="navButton" @click="setPage('create')">Create</p>
+        <p class="navButton" @click="setPage('aboutUs')">About</p>
+        <p class="navButton" @click="setPage('personal')">Mine</p>
         <!-- want to change this when ready -->
-        <button @click="setPage('login')" v-if="currentPage != 'login'">
+        <button @click="setPage('login')" v-if="currentPage !== 'login' ">
           Login
         </button>
       </nav>
@@ -27,7 +27,7 @@
             <button @click="sortWorkouts('day')">Days</button>
             <button @click="sortWorkouts('week')">Weeks</button>
           </div>
-          <hr />
+        
         </div>
 
         <div
@@ -44,11 +44,10 @@
           v-for="(workout,index) in filteredWeeks"
           @click="openWeek(workout._id)"
         >
-          <div>{{workout._id}}</div>
           <div>{{workout.name}}</div>
         </div>
       </div>
-      <div v-if="currentPage === 'login'">
+      <div v-if="currentPage === 'login'" class="login"> 
         <form @submit.prevent="loginUser()">
           <div class="input-container">
             <p class="label">Email</p>
@@ -68,7 +67,7 @@
         </form>
       </div>
 
-      <div v-if="currentPage === 'register'">
+      <div v-if="currentPage === 'register'" class="register">
         <form @submit.prevent="registerUser()">
           <div class="input-container">
             <p class="label">Name</p>
@@ -89,7 +88,7 @@
           </p>
         </form>
       </div>
-      <div v-if="currentPage === 'create'">
+      <div v-if="currentPage === 'create'" class="createPage">
         <button @click="setPage('Cday')">Create a day</button>
         <button @click="setPage('Cweek')">Create a Week</button>
       </div>
@@ -153,7 +152,14 @@
 
       <div v-if="currentPage === 'singleWeek'">
         <button @click="currentPage = 'Browse'">Back</button>
-        <div class="day-in-week" v-for="day in currentWeek.days">{{day}}</div>
+        <div class="day-in-week" v-for="day in currentWeek.days">
+          <h2>{{currentWeek.name}}</h2>
+          <p>{{currentWeek.description}}</p>
+          <p>{{currentWeek.dow}}</p>
+          <div class="day-miau">
+            <h3>{{day.name}}</h3>
+          </div>
+        </div>
       </div>
 
       <div v-if="currentPage === 'singleDay'">

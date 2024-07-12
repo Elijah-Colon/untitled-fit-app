@@ -45,9 +45,18 @@ const DaySchema = Schema({
   },
   workouts: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "Workout",
-      required: [true, "day needs a workout"],
+      exercise: {
+        type: Schema.Types.ObjectId,
+        ref: "Workout",
+        required: [true, "day needs a workout"],
+      },
+
+      sets: {
+        type: Number,
+      },
+      reps: {
+        type: Number,
+      },
     },
   ],
   owner: {

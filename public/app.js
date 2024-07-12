@@ -62,6 +62,7 @@ Vue.createApp({
       console.log(data);
     },
     addDay: function () {
+      console.log(this.newWeekDay)
       this.newWeekDay.push({
         name: "",
         workout: [],
@@ -73,6 +74,8 @@ Vue.createApp({
       console.log(index);
       this.newWeekDay[index].workout.push({
         work: "",
+        searchInput: "",
+        filterWorkout: [],
       });
     },
     // Page switch
@@ -263,7 +266,7 @@ Vue.createApp({
       let data = await response.json();
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
-      console.log(currentWeek.days);
+      console.log(data);
     },
 
     openDay: async function (dayID) {
