@@ -170,10 +170,10 @@ Vue.createApp({
     // open week view
     openWeek: async function (weekID) {
       let response = await fetch(`${URL}/weeks/${weekID}`);
-      let data = await response.json;
+      let data = await response.json();
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
-      console.log(data);
+      console.log(currentWeek.days);
     },
   },
   computed: {
