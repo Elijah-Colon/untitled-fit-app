@@ -28,6 +28,13 @@ Vue.createApp({
       currentUser: {},
       currentWeek: [],
       currentDay: [],
+      newWeek: {
+        name: "",
+        dow: [],
+        desciption: "",
+        days: [],
+      },
+      newWeekDay: [],
     };
   },
   methods: {
@@ -55,7 +62,19 @@ Vue.createApp({
       this.weeks = data;
       console.log(data);
     },
-
+    addDay: function () {
+      this.newWeekDay.push({
+        name: "",
+        workout: [],
+      });
+    },
+    makeWorkout: function (index) {
+      console.log(this.newWeekDay);
+      console.log(index);
+      this.newWeekDay[index].workout.push({
+        work: "",
+      });
+    },
     // Page switch
     setPage: function (page) {
       this.currentPage = page;
@@ -63,6 +82,8 @@ Vue.createApp({
     addworkout: function () {
       this.newWorkout.push({
         work: {},
+        searchInput: "",
+        filterWorkout: [],
       });
     },
     removeWorkout: function (index) {
