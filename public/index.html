@@ -11,12 +11,12 @@
     <div id="app">
       <nav>
         <h1>Untitled Fit App</h1>
-        <p @click="setPage('Browse')">Browse</p>
-        <p @click="setPage('create')">Create</p>
-        <p @click="setPage('aboutUs')">About</p>
-        <p @click="setPage('personal')">Mine</p>
+        <p class="navButton" @click="setPage('Browse')">Browse</p>
+        <p class="navButton" @click="setPage('create')">Create</p>
+        <p class="navButton" @click="setPage('aboutUs')">About</p>
+        <p class="navButton" @click="setPage('personal')">Mine</p>
         <!-- want to change this when ready -->
-        <button @click="setPage('login')" v-if="currentPage != 'login'">
+        <button @click="setPage('login')" v-if="currentPage !== 'login' ">
           Login
         </button>
       </nav>
@@ -27,7 +27,7 @@
             <button @click="sortWorkouts('day')">Days</button>
             <button @click="sortWorkouts('week')">Weeks</button>
           </div>
-          <hr />
+        
         </div>
 
         <div
@@ -47,7 +47,7 @@
           <div>{{workout.name}}</div>
         </div>
       </div>
-      <div v-if="currentPage === 'login'">
+      <div v-if="currentPage === 'login'" class="login"> 
         <form @submit.prevent="loginUser()">
           <div class="input-container">
             <p class="label">Email</p>
@@ -67,7 +67,7 @@
         </form>
       </div>
 
-      <div v-if="currentPage === 'register'">
+      <div v-if="currentPage === 'register'" class="register">
         <form @submit.prevent="registerUser()">
           <div class="input-container">
             <p class="label">Name</p>
@@ -88,7 +88,7 @@
           </p>
         </form>
       </div>
-      <div v-if="currentPage === 'create'">
+      <div v-if="currentPage === 'create'" class="createPage">
         <button @click="setPage('Cday')">Create a day</button>
         <button @click="setPage('Cweek')">Create a Week</button>
       </div>
@@ -123,7 +123,7 @@
         <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
         <div v-for="(day,Dayindex) in newWeekDay">
           <p>Day Name</p>
-          <input type="text" v-model="newWeekDay.name" placeholder="Title..." />
+          <input type="text" v-model="day.name" placeholder="Title..." />
 
           <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
           <button @click="makeWorkout(Dayindex)">add workout</button>
