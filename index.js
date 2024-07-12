@@ -138,10 +138,12 @@ app.delete("/days/:id", AuthMiddleware, async function (request, response) {
   }
 });
 
-app.get("/days/:daysid", async function (req, res) {
+app.get("/days/:dayID", async function (req, res) {
   try {
     // console.log(req.params.daysid);
-    let day = await model.Day.findOne({ _id: req.params.daysid });
+    let day = await model.Day.findOne({ _id: req.params.dayID })
+      .populate("owner", "-password")
+      .populate("workouts");
     // console.log(day);
     if (!day) {
       console.log("Day not found");
@@ -189,7 +191,7 @@ app.post("/days", AuthMiddleware, async function (req, res) {
     }
 
     await newDay.save();
-    res.status(201).send("Created Day :3");
+    res.status(201).json(newDay);
   } catch (error) {
     console.error(error);
     res.status(422).send(error);
@@ -335,20 +337,20 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
   }
 });
 
-app.get("/weeks/:weeksid", async function (req, res) {
+app.get("/weeks/:weekID", async function (req, res) {
   try {
-    let week = await model.Week.find({ _id: req.params.weekid })
+    console.log(req.params.weekID);
+    let week = await model.Week.find({ _id: req.params.weekID })
       .populate("owner", "-password")
       .populate("days")
       .populate({ path: "days", populate: { path: "workouts" } });
-    // console.log(week);
+    console.log(week);
     if (!week) {
       console.log("week not found");
       res.status(404).send("week not found");
       return;
     }
     res.json(week);
-    console.log(res);
   } catch (error) {
     console.log(error);
     console.log("bad requst (GET week)");

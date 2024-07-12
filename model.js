@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const { Schema } = mongoose;
 
-mongoose.connect(process.env.DATABASE);
+mongoose.connect(process.env.DBPASSWORD);
 
 const UserSchema = Schema({
   email: {
@@ -67,7 +67,7 @@ const WeekSchema = Schema({
   },
   dow: {
     type: String,
-    required: [true, "Week needs a day of the week"],
+    required: false,
   },
   description: {
     type: String,

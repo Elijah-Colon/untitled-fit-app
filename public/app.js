@@ -27,6 +27,13 @@ Vue.createApp({
       sort: "",
       currentUser: {},
       currentWeek: [],
+      currentDay: [],
+      newWeek: {
+        name: "",
+        desciption: "",
+        days: [],
+      },
+      newWeekDay: [],
     };
   },
   methods: {
@@ -54,7 +61,20 @@ Vue.createApp({
       this.weeks = data;
       console.log(data);
     },
-
+    addDay: function () {
+      this.newWeekDay.push({
+        name: "",
+        workout: [],
+        id: "",
+      });
+    },
+    makeWorkout: function (index) {
+      console.log(this.newWeekDay);
+      console.log(index);
+      this.newWeekDay[index].workout.push({
+        work: "",
+      });
+    },
     // Page switch
     setPage: function (page) {
       this.currentPage = page;
@@ -62,6 +82,8 @@ Vue.createApp({
     addworkout: function () {
       this.newWorkout.push({
         work: {},
+        searchInput: "",
+        filterWorkout: [],
       });
     },
     removeWorkout: function (index) {
@@ -92,6 +114,74 @@ Vue.createApp({
         console.log("Failed");
       }
     },
+    createWeekdays: async function () {
+      let days = [];
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      this.newWeekDay.forEach(async (element) => {
+        console.log(element.id);
+        console.log(element.id === "");
+        if (element.id === "") {
+          this.newDay.name = element.name;
+          // this.newDay.name.push(element.name);
+          element.workout.forEach((id) => {
+            this.newDay.workouts.push(id.work);
+          });
+          //
+          // end of second loop
+          //
+
+          let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: JSON.stringify(this.newDay),
+          };
+          let response = await fetch(`${URL}/days`, requestOptions);
+          let data = await response.json();
+          console.log("ID", data._id);
+
+          days.push(data._id.toString());
+          console.log("inside loop", days);
+
+          console.log("new week object", this.newWeek);
+          console.log(response);
+          if (response.status === 201) {
+            this.clearday();
+            console.log("Succesfully created");
+          } else {
+            console.log("Failed to make weekday");
+          }
+        } else {
+          days.push(element.id.toString());
+        }
+      });
+
+      this.newWeek.days = days;
+    },
+    createWeek: async function () {
+      await this.createWeekdays();
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(this.newWeek),
+      };
+
+      let response = await fetch(`${URL}/weeks`, requestOptions);
+      console.log(response);
+      if (response.status === 201) {
+        this.getDays();
+        this.clearday();
+        this.currentPage = "Browse";
+        console.log("Succesfully created");
+      } else {
+        console.log("Failed to create week");
+      }
+    },
+
     clearday: function () {
       this.newDay = {
         name: "",
@@ -170,9 +260,17 @@ Vue.createApp({
     // open week view
     openWeek: async function (weekID) {
       let response = await fetch(`${URL}/weeks/${weekID}`);
-      let data = await response.json;
+      let data = await response.json();
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
+      console.log(currentWeek.days);
+    },
+
+    openDay: async function (dayID) {
+      let response = await fetch(`${URL}/days/${dayID}`);
+      let data = await response.json();
+      this.currentDay = data;
+      this.currentPage = "singleDay";
       console.log(data);
     },
   },
