@@ -13,8 +13,9 @@ Vue.createApp({
         password: "",
       },
       searchInput: "",
+
       newDay: {
-        title: "",
+        name: "",
         workouts: [],
       },
       newWorkout: [
@@ -23,19 +24,14 @@ Vue.createApp({
         },
       ],
       sort: "",
-// -----------------
+      currentWeek: [],
       newWeek:{
         name:"",
-        days:[]
+        dow:[],
+        desciption:"",
+        days:[],
       },
-
-      Wdays:[
-        {
-          name: "",
-          workouts: [],
-        }
-      ],
-
+      newWeekDay:[],
     };
   },
   methods: {
@@ -55,7 +51,6 @@ Vue.createApp({
       let data = await response.json();
       this.days = data;
       console.log(data);
-      console.log("hello");
     },
     // Weeks
     getWeeks: async function () {
@@ -67,13 +62,15 @@ Vue.createApp({
       console.log("hello");
     },
     addDay: function() {
-      this.Wdays.push({
+      this.newWeekDay.push({
         name: "",
-        workouts: [],
+        workout: [],
       });
     },
     makeWorkout: function (index){
-      this.Wdays[index].workouts.push({
+      console.log(this.newWeekDay)
+      console.log(index)
+      this.newWeekDay[index].workout.push({
         work:""
       })
     },
@@ -84,6 +81,8 @@ Vue.createApp({
     addworkout: function () {
       this.newWorkout.push({
         work: {},
+        searchInput:"",
+        filterWorkout:[]
       });
     },
     removeWorkout: function (index) {
@@ -93,13 +92,18 @@ Vue.createApp({
     createDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      this.newDay.workouts = this.newWorkout;
+
+      this.newWorkout.forEach((element) => {
+        console.log(element);
+        this.newDay.workouts.push(element.work);
+      });
       let requestOptions = {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(this.newDay),
       };
       let response = await fetch(`${URL}/days`, requestOptions);
+      console.log(response);
       if (response.status === 201) {
         this.getDays();
         this.clearday();
@@ -111,7 +115,7 @@ Vue.createApp({
     },
     clearday: function () {
       this.newDay = {
-        title: "",
+        name: "",
         workouts: [],
       };
     },
@@ -182,6 +186,15 @@ Vue.createApp({
     },
     sortWorkouts: function (sort) {
       this.sort = sort;
+    },
+
+    // open week view
+    openWeek: async function (weekID) {
+      let response = await fetch(`${URL}/weeks/${weekID}`);
+      let data = await response.json;
+      this.currentWeek = data[0];
+      this.currentPage = "singleWeek";
+      console.log(data);
     },
   },
   computed: {

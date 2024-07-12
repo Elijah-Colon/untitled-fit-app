@@ -335,10 +335,12 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
   }
 });
 
-app.get("/weeks/:weeksid", async function (res, req) {
+app.get("/weeks/:weeksid", async function (req, res) {
   try {
-    // console.log(req.params.weekid);
-    let week = await model.Week.Findone({ _id: req.params.weekid });
+    let week = await model.Week.find({ _id: req.params.weekid })
+      .populate("owner", "-password")
+      .populate("days")
+      .populate({ path: "days", populate: { path: "workouts" } });
     // console.log(week);
     if (!week) {
       console.log("week not found");
@@ -346,9 +348,10 @@ app.get("/weeks/:weeksid", async function (res, req) {
       return;
     }
     res.json(week);
+    console.log(res);
   } catch (error) {
     console.log(error);
-    console.log("bad requst (Get week)");
+    console.log("bad requst (GET week)");
     res.status(400).send("week not found");
   }
 });

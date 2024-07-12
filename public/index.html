@@ -13,7 +13,8 @@
         <h1>Untitled Fit App</h1>
         <p @click="setPage('Browse')">Browse</p>
         <p @click="setPage('create')">Create</p>
-        <p @click="setPage('aboutUs')">About us</p>
+        <p @click="setPage('aboutUs')">About</p>
+        <p @click="setPage('personal')">Mine</p>
         <!-- want to change this when ready -->
         <button @click="setPage('login')" v-if="currentPage != 'login'">
           Login
@@ -40,7 +41,9 @@
           class="Browse"
           v-if="sort === 'week'"
           v-for="(workout,index) in filteredWeeks"
+          @click="openWeek(workout._id)"
         >
+          <div>{{workout._id}}</div>
           <div>{{workout.name}}</div>
         </div>
       </div>
@@ -92,7 +95,7 @@
       <div v-if="currentPage ==='aboutUs'"></div>
       <div v-if="currentPage === 'Cday'">
         <p>Title</p>
-        <input type="text" placeholder="title" v-model="newDay.title" />
+        <input type="text" placeholder="title" v-model="newDay.name" />
         <p>Wokouts</p>
         <div v-for="(workouts, index) in newWorkout">
           <input type="text" v-model="searchInput" />
@@ -112,26 +115,26 @@
       </div>
       
       <div v-if="currentPage === 'Cweek'">
-       
         <button @click="setPage('create')">Back</button>
-
+          <!-- WEEKS PAGE  -->
         <h3>Create week</h3>
         <p>title</p>
         <input type="text" placeholder="title" v-model="newWeek.name">
-        
-          <div v-for="(day,index) in Wdays">
-
+        <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
+          <div v-for="(day,Dayindex) in newWeekDay">
             <p>Day Name</p>
-            <input type="text" v-model="Wdays.name" placeholder="Title...">
+            <input type="text" v-model="newWeekDay.name" placeholder="Title...">
             
-            <div v-for="(workouts, index) in newWorkout">
+            <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
+            <button @click="makeWorkout(Dayindex)">add workout</button>
+            <div v-for="(workouts, index) in day.workout">
               <input type="text" v-model="searchInput">
               <select v-model="workouts.work">
                 <option v-for=" workout in filteredWorkouts" v-bind:value="workout._id">
-                  {{workout.name}}
+                  {{workout.name}}  {{index}}
                 </option>
               </select>
-              <button @click="addworkout()">add workout</button>
+              
             </div>
 
           </div>
