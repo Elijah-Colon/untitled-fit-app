@@ -44,7 +44,6 @@
           v-for="(workout,index) in filteredWeeks"
           @click="openWeek(workout._id)"
         >
-          <div>{{workout._id}}</div>
           <div>{{workout.name}}</div>
         </div>
       </div>
@@ -145,7 +144,14 @@
 
       <div v-if="currentPage === 'singleWeek'">
         <button @click="currentPage = 'Browse'">Back</button>
-        <div class="day-in-week" v-for="day in currentWeek.days">{{day}}</div>
+        <div class="day-in-week" v-for="day in currentWeek.days">
+          <h2>{{currentWeek.name}}</h2>
+          <p>{{currentWeek.description}}</p>
+          <p>{{currentWeek.dow}}</p>
+          <div class="day-miau">
+            <h3>{{day.name}}</h3>
+          </div>
+        </div>
       </div>
 
       <div v-if="currentPage === 'singleDay'">

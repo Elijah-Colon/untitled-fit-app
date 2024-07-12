@@ -195,7 +195,7 @@ Vue.createApp({
       let data = await response.json();
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
-      console.log(currentWeek.days);
+      console.log(data);
     },
 
     openDay: async function (dayID) {
