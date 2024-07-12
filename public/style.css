@@ -3,19 +3,38 @@
   padding: 0;
   box-sizing: border-box;
 }
+body{
+  background-color: rgba(88, 88, 88, 0.996);
+}
 
 nav {
   display: flex;
+  height: 7vh;
+  width: 100%;
   align-items: center;
   justify-content: space-around;
-  background-color: aliceblue;
-  position: relative;
-  position: sticky;
-  top: 0;
+  background-color: rgb(106, 83, 139);
 }
-
+.createPage{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.login{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 50vh;
+}
+.register{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 50vh;
+}
 .Browse {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(236, 109, 255, 0.267);
   height: 60px;
   display: grid;
   grid-template-columns: 4fr 2fr 3fr 1fr 1fr;
@@ -30,4 +49,11 @@ nav {
   justify-content: center;
   align-items: center;
   gap: 1rem;
+}
+.navButton:hover{
+  color: gray;
+  cursor: pointer;
+}
+.navButton{
+  font-size: 2.5vh;
 }
