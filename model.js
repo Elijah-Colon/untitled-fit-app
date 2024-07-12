@@ -37,7 +37,7 @@ const WorkoutSchema = Schema({
     required: false,
   },
 });
-
+// got to make front end work with this
 const DaySchema = Schema({
   name: {
     type: String,
@@ -45,6 +45,10 @@ const DaySchema = Schema({
   },
   workouts: [
     {
+      type: Schema.Types.ObjectId,
+      ref: "Workout",
+      required: [true, "day needs a workout"],
+
       exercise: {
         type: Schema.Types.ObjectId,
         ref: "Workout",

@@ -173,6 +173,7 @@ app.get("/days", async function (request, response) {
     response.status(500).send(error);
   }
 });
+// got to fix post for days too include exercise maybe we dont need it. we will talk about this and if needed go back to old repo
 
 app.post("/days", AuthMiddleware, async function (req, res) {
   try {
