@@ -120,7 +120,7 @@
       <div v-if="currentPage === 'singleWeek'">
         <button @click="currentPage = 'Browse'">Back</button>
         <!-- <div class="day-in-week" v-for="day in week.days">{{day}}</div> -->
-    </div>
+      </div>
 
       <div v-if="currentPage === 'personal'">
         <div v-for="(workout,index)  in filteredDays">
@@ -129,6 +129,7 @@
           </div>
         </div>
       </div>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>
