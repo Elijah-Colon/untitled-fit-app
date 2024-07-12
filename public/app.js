@@ -11,6 +11,7 @@ Vue.createApp({
         name: "",
         email: "",
         password: "",
+        _id: "",
       },
       searchInput: "",
 
@@ -24,6 +25,7 @@ Vue.createApp({
         },
       ],
       sort: "",
+      currentUser: {},
       currentWeek: [],
     };
   },
@@ -35,7 +37,6 @@ Vue.createApp({
       let data = await response.json();
       this.workouts = data;
       console.log(data);
-      console.log("hello");
     },
     // Days
     getDays: async function () {
@@ -52,7 +53,6 @@ Vue.createApp({
       let data = await response.json();
       this.weeks = data;
       console.log(data);
-      console.log("hello");
     },
 
     // Page switch
@@ -129,6 +129,7 @@ Vue.createApp({
       };
       let response = await fetch(`${URL}/session`, requestOptions);
       let data = await response.json();
+
       if (response.status === 201) {
         console.log("successfully logged in");
         this.currentUser = data;
@@ -142,7 +143,6 @@ Vue.createApp({
     },
     getSession: async function () {
       let response = await fetch(`${URL}/session`);
-
       if (response.status === 200) {
         let data = await response.json();
         this.currentUser = data;
@@ -205,5 +205,6 @@ Vue.createApp({
     this.getWorkouts();
     this.getDays();
     this.getWeeks();
+    this.getSession();
   },
 }).mount("#app");

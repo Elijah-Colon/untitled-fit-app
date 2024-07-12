@@ -200,7 +200,7 @@ app.post("/days", AuthMiddleware, async function (req, res) {
 // Sessions
 //
 
-app.get("/session", (response, request) => {
+app.get("/session", (request, response) => {
   response.send(request.session);
 });
 
