@@ -124,7 +124,7 @@
         <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
         <div v-for="(day,Dayindex) in newWeekDay">
           <p>Day Name</p>
-          <input type="text" v-model="newWeekDay.name" placeholder="Title..." />
+          <input type="text" v-model="day.name" placeholder="Title..." />
 
           <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
           <button @click="makeWorkout(Dayindex)">add workout</button>

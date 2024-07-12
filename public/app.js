@@ -63,6 +63,7 @@ Vue.createApp({
       console.log(data);
     },
     addDay: function () {
+      console.log(this.newWeekDay)
       this.newWeekDay.push({
         name: "",
         workout: [],
@@ -73,6 +74,8 @@ Vue.createApp({
       console.log(index);
       this.newWeekDay[index].workout.push({
         work: "",
+        searchInput: "",
+        filterWorkout: [],
       });
     },
     // Page switch
