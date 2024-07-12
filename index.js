@@ -138,10 +138,12 @@ app.delete("/days/:id", AuthMiddleware, async function (request, response) {
   }
 });
 
-app.get("/days/:daysid", async function (req, res) {
+app.get("/days/:dayID", async function (req, res) {
   try {
     // console.log(req.params.daysid);
-    let day = await model.Day.findOne({ _id: req.params.daysid });
+    let day = await model.Day.findOne({ _id: req.params.dayID })
+      .populate("owner", "-password")
+      .populate("workouts");
     // console.log(day);
     if (!day) {
       console.log("Day not found");

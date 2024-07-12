@@ -27,6 +27,7 @@ Vue.createApp({
       sort: "",
       currentUser: {},
       currentWeek: [],
+      currentDay: [],
     };
   },
   methods: {
@@ -174,6 +175,14 @@ Vue.createApp({
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
       console.log(currentWeek.days);
+    },
+
+    openDay: async function (dayID) {
+      let response = await fetch(`${URL}/days/${dayID}`);
+      let data = await response.json();
+      this.currentDay = data;
+      this.currentPage = "singleDay";
+      console.log(data);
     },
   },
   computed: {
