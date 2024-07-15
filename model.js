@@ -16,6 +16,20 @@ const UserSchema = Schema({
     type: String,
     required: [true, "User MUST have a password"],
   },
+  rsw: {
+    type: Map,
+    of: {
+      reps: {
+        type: Number,
+      },
+      sets: {
+        type: Number,
+      },
+      weight: {
+        type: Number,
+      },
+    },
+  },
 });
 
 const WorkoutSchema = Schema({
