@@ -128,31 +128,51 @@
         />
         <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
         <div v-for="(day,Dayindex) in newWeekDay">
-          <p>Day Name</p>
-          <input type="text" v-model="day.name" placeholder="Title..." />
+          <div v-if="day.show">
+            <p>Day Name</p>
+            <input type="text" v-model="day.name" placeholder="Title..." />
 
-          <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
-          <button @click="makeWorkout(Dayindex)">add workout</button>
-          <div v-for="(workouts, index) in day.workout">
+            <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
+            <button @click="makeWorkout(Dayindex)">add workout</button>
+            <div v-for="(workouts, index) in day.workout">
+              <input type="text" v-model="searchInput" />
+              <select v-model="workouts.work">
+                <option
+                  v-for=" workout in filteredWorkouts"
+                  v-bind:value="workout._id"
+                >
+                  {{workout.name}}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div v-else>hello {{day.name}}</div>
+        </div>
+        <div class="modal" v-show="!modalOpen">
+          <div class="content">
+            <div id="close" @click="toggleModal()">X</div>
             <input type="text" v-model="searchInput" />
-            <select v-model="workouts.work">
-              <option
-                v-for=" workout in filteredWorkouts"
-                v-bind:value="workout._id"
-              >
-                {{workout.name}}
+            <!-- need to fix this to where it only shows the users ones and not all the ones in the database -->
+
+            <select v-model="modal.id">
+              <option v-for="day in filteredDays" v-bind:value="day._id">
+                <div v-if="day.owner._id === currentUser.userID">
+                  {{day.name}} {{currentUser.userID}} {{day.owner._id}}
+                </div>
               </option>
             </select>
+            <button v-on:click="updateNewWeekday()">Save</button>
           </div>
         </div>
-        <button @click="addDay()">Add Day</button>
+        <button @click="addDay()">Create Day</button>
+        <button @click="toggleModal()">Add Day</button>
         <button @click="createWeek()">Create Week</button>
       </div>
 
       <div v-if="currentPage === 'singleWeek'">
         <button @click="currentPage = 'Browse'">Back</button>
         <div class="day-in-week" v-for="day in currentWeek">
-          <h1>hello</h1>
+          <h1>hello boi</h1>
           <h2>{{currentWeek.name}}</h2>
           <p>{{currentWeek.description}}</p>
           <p>{{currentWeek.dow}}</p>

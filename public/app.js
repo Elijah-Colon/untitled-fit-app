@@ -33,6 +33,13 @@ Vue.createApp({
         days: [],
       },
       newWeekDay: [],
+      modalOpen: true,
+      modal: {
+        name: "",
+        workout: [],
+        id: "",
+        show: false,
+      },
     };
   },
   methods: {
@@ -65,8 +72,36 @@ Vue.createApp({
         name: "",
         workout: [],
         id: "",
+        show: true,
       });
     },
+    toggleModal: function () {
+      this.modalOpen = !this.modalOpen;
+    },
+    updateNewWeekday: async function () {
+      if (this.modal.id != "") {
+        let response = await fetch(`${URL}/days/${this.modal.id}`);
+        let data = await response.json();
+        let modal = {
+          name: "",
+          workout: [],
+          id: "",
+          show: false,
+        };
+        modal.name = data.name;
+        modal.id = this.modal.id;
+        this.newWeekDay.push(modal);
+        console.log("LOCal", modal);
+        console.log("modal", this.modal);
+        console.log("week", this.newWeekDay);
+        this.modal.name = "";
+        this.modal.id = "";
+        this.toggleModal();
+      } else {
+        alert("Please enter a day");
+      }
+    },
+
     makeWorkout: function (index) {
       console.log(this.newWeekDay);
       console.log(index);
@@ -155,7 +190,9 @@ Vue.createApp({
             console.log("Failed to make weekday");
           }
         } else {
+          console.log("YOOO IT WORKS");
           days.push(element.id.toString());
+          console.log(days);
         }
       }
 
@@ -173,13 +210,14 @@ Vue.createApp({
         headers: myHeaders,
         body: JSON.stringify(this.newWeek),
       };
-
+      console.log(this.newWeek);
       let response = await fetch(`${URL}/weeks`, requestOptions);
       console.log(response);
       if (response.status === 201) {
         this.getDays();
         this.getWeeks();
         this.clearday();
+        this.clearWeek();
         this.currentPage = "Browse";
         console.log("Succesfully created");
       } else {
@@ -193,6 +231,7 @@ Vue.createApp({
         workouts: [],
       };
     },
+
     //  this is for register
     registerUser: async function () {
       console.log(this.user);
@@ -278,6 +317,18 @@ Vue.createApp({
       this.currentDay = data;
       this.currentPage = "singleDay";
       console.log(data);
+    },
+    clearWeek: function () {
+      (this.newWeekDay = []),
+        (this.newDay = {
+          name: "",
+          workouts: [],
+        });
+      this.newWeek = {
+        name: "",
+        description: "",
+        days: [],
+      };
     },
   },
   computed: {
