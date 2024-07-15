@@ -1,5 +1,4 @@
 const URL = "http://localhost:8080";
-
 Vue.createApp({
   data() {
     return {
@@ -30,7 +29,7 @@ Vue.createApp({
       currentDay: [],
       newWeek: {
         name: "",
-        desciption: "",
+        description: "",
         days: [],
       },
       newWeekDay: [],
@@ -121,15 +120,16 @@ Vue.createApp({
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 
-      this.newWeekDay.forEach(async (element) => {
+      for (let element of this.newWeekDay) {
         console.log(element.id);
+        console.log(element);
         console.log(element.id === "");
         if (element.id === "") {
           this.newDay.name = element.name;
           // this.newDay.name.push(element.name);
-          element.workout.forEach((id) => {
+          for (let id of element.workout) {
             this.newDay.workouts.push(id.work);
-          });
+          }
           //
           // end of second loop
           //
@@ -157,14 +157,16 @@ Vue.createApp({
         } else {
           days.push(element.id.toString());
         }
-      });
+      }
 
       this.newWeek.days = days;
     },
     createWeek: async function () {
       await this.createWeekdays();
+
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
+      console.log("OUTSIDE");
 
       let requestOptions = {
         method: "POST",
@@ -176,6 +178,7 @@ Vue.createApp({
       console.log(response);
       if (response.status === 201) {
         this.getDays();
+        this.getWeeks();
         this.clearday();
         this.currentPage = "Browse";
         console.log("Succesfully created");
@@ -263,9 +266,10 @@ Vue.createApp({
     openWeek: async function (weekID) {
       let response = await fetch(`${URL}/weeks/${weekID}`);
       let data = await response.json();
-      this.currentWeek = data[0];
+      this.currentWeek = data;
       this.currentPage = "singleWeek";
-      console.log(currentWeek.days);
+      console.log("DATA", data);
+      console.log(this.currentWeek);
     },
 
     openDay: async function (dayID) {

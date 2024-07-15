@@ -143,7 +143,7 @@ app.get("/days/:dayID", async function (req, res) {
     // console.log(req.params.daysid);
     let day = await model.Day.findOne({ _id: req.params.dayID })
       .populate("owner", "-password")
-      .populate({ path: "workouts", populate: { path: "exercise" } });
+      .populate("workouts");
     // console.log(day);
     if (!day) {
       console.log("Day not found");
@@ -162,7 +162,7 @@ app.get("/days", async function (request, response) {
   try {
     let day = await model.Day.find()
       .populate("owner", "-password")
-      .populate({ path: "workouts", populate: { path: "exercise" } });
+      .populate("workouts");
     if (!day) {
       return response.status(404).send("Could not find that workout");
     }
@@ -182,8 +182,6 @@ app.post("/days", AuthMiddleware, async function (req, res) {
       workouts: req.body.workouts,
       owner: req.session.userID,
       reviews: req.body.reviews,
-      reps: req.body.reps,
-      sets: req.body.sets,
     });
 
     const error = await newDay.validateSync();
@@ -280,10 +278,7 @@ app.get("/weeks", async function (req, res) {
     let week = await model.Week.find()
       .populate("owner", "-password")
       .populate("days")
-      .populate({
-        path: "days",
-        populate: { path: "workouts", populate: { path: "exercise" } },
-      });
+      .populate({ path: "days", populate: { path: "workouts" } });
     // console.log(week);
     if (!week) {
       res.status(404).send("Weeks not found");
@@ -349,10 +344,7 @@ app.get("/weeks/:weekID", async function (req, res) {
     let week = await model.Week.find({ _id: req.params.weekID })
       .populate("owner", "-password")
       .populate("days")
-      .populate({
-        path: "days",
-        populate: { path: "workouts", populate: { path: "exercise" } },
-      });
+      .populate({ path: "days", populate: { path: "workouts" } });
 
     console.log(week);
     if (!week) {
