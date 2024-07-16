@@ -34,6 +34,8 @@ Vue.createApp({
         days: [],
       },
       newWeekDay: [],
+      timestamp: "",
+      weekInt: null,
     };
   },
   methods: {
@@ -229,6 +231,7 @@ Vue.createApp({
         this.user.email = "";
         this.user.password = "";
         this.currentPage = "Browse";
+        await this.runTimestamp();
       } else {
         console.log("Failed to log in");
       }
@@ -265,7 +268,7 @@ Vue.createApp({
       let data = await response.json();
       this.currentWeek = data[0];
       this.currentPage = "singleWeek";
-      console.log(currentWeek.days);
+      console.log(this.currentWeek.days);
     },
 
     openDay: async function (dayID) {
@@ -274,6 +277,65 @@ Vue.createApp({
       this.currentDay = data;
       this.currentPage = "singleDay";
       console.log(data);
+    },
+
+    // Incriment and Timestamp code
+
+    getTimestamp: async function () {
+      let res = await fetch(`${URL}/time/${this.currentUser.userID}`);
+      let data = await res.json();
+      this.timestamp = data.time;
+      this.weekInt = data.weekInt;
+      let day = new Date(this.timestamp);
+      this.weekInt = day.getDay();
+    },
+    createTimestamp: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let day = new Date(this.timestamp);
+      dayNum = day.getDay();
+
+      let requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(dayNum),
+      };
+
+      let res = await fetch(`${URL}/time`, requestOptions);
+      if (res.status === 201) {
+        console.log("Timestamp made");
+      } else {
+        console.log("failed to create timestamp");
+      }
+    },
+    updateTimestamp: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let day = new Date(this.timestamp);
+      dayNum = day.getDay();
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(dayNum),
+      };
+
+      let res = await fetch(`${URL}/time/${this.user._id}`, requestOptions);
+
+      if (res.status === 201) {
+        console.log("updated Timestamp");
+      } else {
+        console.log("failed to update Timestamp");
+      }
+    },
+    runTimestamp: async function () {
+      await this.getTimestamp();
+      oldNum = this.weekInt;
+      this.updateTimestamp(this.user._id);
+      await this.getTimestamp();
+      newNum = this.weekInt;
     },
   },
   computed: {
@@ -297,8 +359,6 @@ Vue.createApp({
       });
     },
   },
-
-  // register and session
 
   created: function () {
     console.log("app loaded");

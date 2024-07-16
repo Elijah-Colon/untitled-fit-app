@@ -170,7 +170,7 @@ app.get("/days/:dayID", async function (req, res) {
     // console.log(req.params.daysid);
     let day = await model.Day.findOne({ _id: req.params.dayID })
       .populate("owner", "-password")
-      .populate({ path: "workouts", populate: { path: "exercise" } });
+      .populate({ path: "workouts" });
     // console.log(day);
     if (!day) {
       console.log("Day not found");
@@ -189,7 +189,7 @@ app.get("/days", async function (request, response) {
   try {
     let day = await model.Day.find()
       .populate("owner", "-password")
-      .populate({ path: "workouts", populate: { path: "exercise" } });
+      .populate({ path: "workouts" });
     if (!day) {
       return response.status(404).send("Could not find that workout");
     }
@@ -309,7 +309,7 @@ app.get("/weeks", async function (req, res) {
       .populate("days")
       .populate({
         path: "days",
-        populate: { path: "workouts", populate: { path: "exercise" } },
+        populate: { path: "workouts" },
       });
     // console.log(week);
     if (!week) {
@@ -378,7 +378,7 @@ app.get("/weeks/:weekID", async function (req, res) {
       .populate("days")
       .populate({
         path: "days",
-        populate: { path: "workouts", populate: { path: "exercise" } },
+        populate: { path: "workouts" },
       });
 
     console.log(week);
@@ -392,6 +392,73 @@ app.get("/weeks/:weekID", async function (req, res) {
     console.log(error);
     console.log("bad requst (GET week)");
     res.status(400).send("week not found");
+  }
+});
+
+// incrimenting code
+
+app.post("/time", AuthMiddleware, async function (req, res) {
+  try {
+    const timestamp = new model.Time({
+      owner: req.session.userID,
+      weekInt: req.body.weekInt,
+    });
+
+    const error = await timestamp.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+
+    await timestamp.save();
+    res.status(201).send("Created Stamp");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
+  }
+});
+
+app.put("/time", AuthMiddleware, async function (req, res) {
+  try {
+    let timestamp = await model.Time.findOne({
+      owner: req.session.userID,
+    }).populate("owner");
+
+    if (!timestamp) {
+      res.status(404).send("Could not find timestamp");
+      return;
+    }
+
+    timestamp.weekInt = req.body.weekInt;
+
+    const error = await timestamp.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+    await timestamp.save();
+    res.status(201).send("successfully updated");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
+  }
+});
+
+app.get("/time/:userID", async function (req, res) {
+  try {
+    let timestamp = await model.Time.findOne({ owner: req.params.userID });
+    if (!timestamp) {
+      console.log("Timestamp not found");
+      res.status(404).send("Timestamp not found");
+      return;
+    }
+    res.json(timestamp);
+  } catch (error) {
+    console.log(error);
+    consle.log("Bad request (GET)");
+    res.status(400).send("Timestamp not found");
   }
 });
 
