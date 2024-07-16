@@ -21,6 +21,7 @@ Vue.createApp({
       newWorkout: [
         {
           work: "",
+          searchInput: "",
         },
       ],
       sort: "",
@@ -124,14 +125,18 @@ Vue.createApp({
     },
     removeWorkout: function (index) {
       this.newWorkout.splice(index);
-      console.log(this.newWorkout);
+    },
+    removeWorkoutWeek: function (day, index) {
+      day.workout.splice(index);
+      console.log(this.newWeekDay);
+    },
+    removeDayWeek: function (index) {
+      this.newWeekDay.splice(index);
     },
     createDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
       this.newWorkout.forEach((element) => {
-        console.log(element);
         this.newDay.workouts.push(element.work);
       });
       let requestOptions = {
@@ -330,12 +335,18 @@ Vue.createApp({
         days: [],
       };
     },
+    filteredWorkouts: function (weeksworkout) {
+      return this.workouts.filter((workout) => {
+        return workout.name
+          .toLowerCase()
+          .includes(weeksworkout.searchInput.toLowerCase());
+      });
+    },
   },
   computed: {
     filteredDays: function () {
       return this.days.filter((day) => {
         return day.name.toLowerCase().includes(this.searchInput.toLowerCase());
-        console.log(this.days);
       });
     },
 
@@ -344,11 +355,10 @@ Vue.createApp({
         return week.name.toLowerCase().includes(this.searchInput.toLowerCase());
       });
     },
-    filteredWorkouts: function () {
-      return this.workouts.filter((workout) => {
-        return workout.name
-          .toLowerCase()
-          .includes(this.searchInput.toLowerCase());
+
+    ownedFilteredDays: function () {
+      return this.filteredDays.filter((day) => {
+        return day.owner._id.toString() == this.currentUser.userID.toString();
       });
     },
   },
