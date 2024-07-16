@@ -54,18 +54,45 @@ app.post("/users", async (request, response) => {
     let newUser = await new model.User({
       email: request.body.email,
       name: request.body.name,
+      rsw: [],
     });
     await newUser.setPassword(request.body.password);
     const error = await newUser.validateSync();
     if (error) {
       console.log(error);
-      response.status(422).send(error);
+      return response.status(422).send(error);
     }
     await newUser.save();
     response.status(201).send("new User created");
   } catch (error) {
     console.log(error);
     response.status(500).send(error);
+  }
+});
+app.put("/users/:userID", AuthMiddleware, async function (req, res) {
+  try {
+    let user = await model.User.findOne({
+      _id: req.params.userID,
+    });
+
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    user.rsw.set(req.body.workoutID, req.body.rsw);
+
+    const error = await user.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+    await user.save();
+    res.status(201).send("added RSW");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
   }
 });
 
