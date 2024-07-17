@@ -116,21 +116,19 @@
         <v-text-field 
           label="Title" 
           v-model="newDay.name"></v-text-field>
-        <!-- <input type="text" placeholder="title" v-model="newDay.name" /> -->
         <p>Workouts</p>
-        <div v-for="(workouts, index) in newWorkout">
+        <div v-for="(workout, index) in newWorkout">
           <v-text-field 
           label="Search" 
-          v-model="workouts.searchInput"></v-text-field>
-          <!-- <input type="text" v-model="workouts.searchInput" /> -->
-          <v-select v-model="workouts.work"
+          v-model="workout.searchInput"></v-text-field>
+
+          <v-select
+          v-model="workout.work"
+          :items="filteredWorkouts(workout)"
+          item-title="name"
+          filled
+          return-object
           >
-            <option
-              v-for="workout in filteredWorkouts(workouts)"
-              v-bind:value="workout._id"
-            >
-              {{workout.name}}
-            </option>
           </v-select>
           <v-btn  @click="removeWorkout(index)">remove</v-btn>
         </div>
@@ -144,14 +142,21 @@
         <!-- WEEKS PAGE  -->
         <h3>Create week</h3>
         <p>title</p>
-        <input type="text" placeholder="title" v-model="newWeek.name" />
-
+        <!-- <input type="text" placeholder="title" v-model="newWeek.name" /> -->
+        <v-text-field 
+        label="Title"
+        v-model="newWeek.name"> 
+          </v-text-field>
         <p>Description</p>
-        <input
+        <!-- <input
           type="text"
           placeholder="Description"
           v-model="newWeek.description"
-        />
+        /> -->
+        <v-text-field 
+          label="Description"
+          v-model="newWeek.description">
+        </v-text-field>
         <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
         <div v-for="(day,Dayindex) in newWeekDay">
           <!-- add a delete for this -->
