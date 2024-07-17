@@ -4,9 +4,8 @@
   box-sizing: border-box;
 }
 body{
-  background-color: rgba(88, 88, 88, 0.996);
+  background-color: rgb(179, 177, 177);
 }
-
 nav {
   display: flex;
   height: 7vh;

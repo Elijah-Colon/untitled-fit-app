@@ -1,4 +1,8 @@
 const URL = "http://localhost:8080";
+const{ createVuetify } = Vuetify;
+
+const vuetify = createVuetify()
+
 Vue.createApp({
   data() {
     return {
@@ -371,5 +375,6 @@ Vue.createApp({
     this.getDays();
     this.getWeeks();
     this.getSession();
+    
   },
-}).mount("#app");
+}).use(vuetify).mount("#app");

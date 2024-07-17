@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+      <!-- Vuetify CSS -->
+      <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
     <title>Document</title>
   </head>
   <body>
@@ -16,16 +20,19 @@
         <p class="navButton" @click="setPage('aboutUs')">About</p>
         <p class="navButton" @click="setPage('personal')">Mine</p>
         <!-- want to change this when ready -->
-        <button @click="setPage('login')" v-if="currentPage !== 'login' ">
+        <v-btn  @click="setPage('login')" v-if="currentPage !== 'login' ">
           Login
-        </button>
+        </v-btn>
       </nav>
       <div v-if="currentPage === 'Browse'">
         <div class="search">
-          <input type="search" placeholder="search...." v-model="searchInput" />
+          <v-text-field 
+          type="search" 
+          label="Search" 
+          v-model="searchInput"></v-text-field>
           <div>
-            <button @click="sortWorkouts('day')">Days</button>
-            <button @click="sortWorkouts('week')">Weeks</button>
+            <v-btn  @click="sortWorkouts('day')">Days</v-btn>
+            <v-btn  @click="sortWorkouts('week')">Weeks</v-btn>
           </div>
         </div>
 
@@ -51,14 +58,20 @@
           <div class="input-container">
             <p class="label">Email</p>
             <br />
-            <input type="email" v-model="user.email" />
+            <v-text-field 
+            v-model="user.email" 
+            type="email" 
+            label="Email"></v-text-field>
           </div>
           <div class="input-container">
             <p class="label">Password</p>
             <br />
-            <input type="password" v-model="user.password" />
+            <v-text-field 
+              v-model="user.password"
+              type="password" 
+              label="password"></v-text-field>
           </div>
-          <button class="loginButton">Log in</button>
+          <v-btn type="submit" class="loginButton">Log in</v-btn>
           <p>
             Dont have an acount?
             <span @click="setPage('register')">sign up</span>
@@ -70,17 +83,23 @@
         <form @submit.prevent="registerUser()">
           <div class="input-container">
             <p class="label">Name</p>
-            <input type="text" v-model="user.name" />
+            <v-text-field v-model="user.name" label="Name"></v-text-field>
           </div>
           <div class="input-container">
             <p class="label">Email</p>
-            <input type="email" v-model="user.email" />
+            <v-text-field 
+            v-model="user.email" 
+            type="email" 
+            label="Email"></v-text-field>
           </div>
           <div class="input-container">
             <p class="label">Password</p>
-            <input type="password" v-model="user.password" />
+            <v-text-field 
+            v-model="user.password" 
+            type="password" 
+            label="password"></v-text-field>
           </div>
-          <button>Register</button>
+          <v-btn type="submit" >Register</v-btn>
           <p>
             Already have an account?
             <span @click="setPage('login')">Log in</span>
@@ -88,33 +107,40 @@
         </form>
       </div>
       <div v-if="currentPage === 'create'" class="createPage">
-        <button @click="setPage('Cday')">Create a day</button>
-        <button @click="setPage('Cweek')">Create a Week</button>
+        <v-btn  @click="setPage('Cday')">Create a day</v-btn>
+        <v-btn  @click="setPage('Cweek')">Create a Week</v-btn>
       </div>
       <div v-if="currentPage ==='aboutUs'"></div>
       <div v-if="currentPage === 'Cday'">
         <p>Title</p>
-        <input type="text" placeholder="title" v-model="newDay.name" />
-        <p>Wokouts</p>
+        <v-text-field 
+          label="Title" 
+          v-model="newDay.name"></v-text-field>
+        <!-- <input type="text" placeholder="title" v-model="newDay.name" /> -->
+        <p>Workouts</p>
         <div v-for="(workouts, index) in newWorkout">
-          <input type="text" v-model="workouts.searchInput" />
-          <select v-model="workouts.work">
+          <v-text-field 
+          label="Search" 
+          v-model="workouts.searchInput"></v-text-field>
+          <!-- <input type="text" v-model="workouts.searchInput" /> -->
+          <v-select v-model="workouts.work"
+          >
             <option
               v-for="workout in filteredWorkouts(workouts)"
               v-bind:value="workout._id"
             >
               {{workout.name}}
             </option>
-          </select>
-          <button @click="removeWorkout(index)">remove</button>
+          </v-select>
+          <v-btn  @click="removeWorkout(index)">remove</v-btn>
         </div>
-        <button @click="addworkout()">add workout</button>
-        <button @click="createDay()">Create</button>
-        <button @click="setPage('create')">Back</button>
+        <v-btn  @click="addworkout()">add workout</v-btn>
+        <v-btn  @click="createDay()">Create</v-btn>
+        <v-btn  @click="setPage('create')">Back</v-btn>
       </div>
 
       <div v-if="currentPage === 'Cweek'">
-        <button @click="setPage('create')">Back</button>
+        <v-btn  @click="setPage('create')">Back</v-btn>
         <!-- WEEKS PAGE  -->
         <h3>Create week</h3>
         <p>title</p>
@@ -134,8 +160,8 @@
             <input type="text" v-model="day.name" placeholder="Title..." />
 
             <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
-            <button @click="makeWorkout(Dayindex)">add workout</button>
-            <button @click="removeDayWeek(Dayindex)">Delete</button>
+            <v-btn  @click="makeWorkout(Dayindex)">add workout</v-btn>
+            <v-btn  @click="removeDayWeek(Dayindex)">Delete</v-btn>
             <div v-for="(workouts, index) in day.workout">
               <input type="text" v-model="workouts.searchInput" />
               <select v-model="workouts.work">
@@ -147,12 +173,12 @@
                 </option>
               </select>
               <!-- add a delete for this -->
-              <button @click="removeWorkoutWeek(day,index)">Delete</button>
+              <v-btn  @click="removeWorkoutWeek(day,index)">Delete</v-btn>
             </div>
           </div>
           <div v-else>
             {{day.name}}
-            <button @click="removeDayWeek(Dayindex)">Remove</button>
+            <v-btn  @click="removeDayWeek(Dayindex)">Remove</v-btn>
           </div>
         </div>
         <div class="modal" v-show="!modalOpen">
@@ -166,16 +192,16 @@
                 {{day.name}}
               </option>
             </select>
-            <button v-on:click="updateNewWeekday()">Save</button>
+            <v-btn  v-on:click="updateNewWeekday()">Save</v-btn>
           </div>
         </div>
-        <button @click="addDay()">Create Day</button>
-        <button @click="toggleModal()">Add Day</button>
-        <button @click="createWeek()">Create Week</button>
+        <v-btn  @click="addDay()">Create Day</v-btn>
+        <v-btn  @click="toggleModal()">Add Day</v-btn>
+        <v-btn  @click="createWeek()">Create Week</v-btn>
       </div>
 
       <div v-if="currentPage === 'singleWeek'">
-        <button @click="currentPage = 'Browse'">Back</button>
+        <v-btn  @click="currentPage = 'Browse'">Back</v-btn>
         <div class="day-in-week" v-for="day in currentWeek">
           <h1>hello boi</h1>
           <h2>{{currentWeek.name}}</h2>
@@ -188,7 +214,7 @@
       </div>
 
       <div v-if="currentPage === 'singleDay'">
-        <button @click="currentPage = 'Browse'">Back</button>
+        <v-btn  @click="currentPage = 'Browse'">Back</v-btn>
         <div class="workout-in-day" v-for="workout in currentDay.workouts">
           {{workout}}
         </div>
@@ -202,6 +228,9 @@
         </div>
       </div>
     </div>
-    <script src="app.js"></script>
+        <!-- Vue and Vuetify JavaScript -->
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.js"></script>
+        <script src="app.js"></script>
   </body>
 </html>
