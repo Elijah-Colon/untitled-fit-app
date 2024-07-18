@@ -49,6 +49,22 @@ app.get("/users", async (request, response) => {
   }
 });
 
+app.get("/users/:userID", async (req, res) => {
+  try {
+    let user = await model.User.findOne({ _id: req.params.userID });
+    if (!user) {
+      console.log("oops lost the user");
+      res.status(404).send("oops lost the user");
+      return;
+    }
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    console.log("Bad request (GET)");
+    res.status(400).send("User not found");
+  }
+});
+
 app.post("/users", async (request, response) => {
   try {
     let newUser = await new model.User({
@@ -63,6 +79,7 @@ app.post("/users", async (request, response) => {
       return response.status(422).send(error);
     }
     await newUser.save();
+    request.session.userID = newUser._id;
     response.status(201).send("new User created");
   } catch (error) {
     console.log(error);
@@ -385,6 +402,73 @@ app.get("/weeks/:weekID", async function (req, res) {
     console.log(error);
     console.log("bad requst (GET week)");
     res.status(400).send("week not found");
+  }
+});
+
+// incrimenting code
+
+app.post("/time", AuthMiddleware, async function (req, res) {
+  try {
+    const timestamp = new model.Time({
+      owner: req.session.userID,
+      weekInt: req.body.weekInt,
+    });
+
+    const error = await timestamp.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+
+    await timestamp.save();
+    res.status(201).send("Created Stamp");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
+  }
+});
+
+app.put("/time", AuthMiddleware, async function (req, res) {
+  try {
+    let timestamp = await model.Time.findOne({
+      owner: req.session.userID,
+    }).populate("owner");
+
+    if (!timestamp) {
+      res.status(404).send("Could not find timestamp");
+      return;
+    }
+
+    timestamp.weekInt = req.body.weekInt;
+
+    const error = await timestamp.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+    await timestamp.save();
+    res.status(201).send("successfully updated");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
+  }
+});
+
+app.get("/time/:userID", async function (req, res) {
+  try {
+    let timestamp = await model.Time.findOne({ owner: req.params.userID });
+    if (!timestamp) {
+      console.log("Timestamp not found");
+      res.status(404).send("Timestamp not found");
+      return;
+    }
+    res.json(timestamp);
+  } catch (error) {
+    console.log(error);
+    console.log("Bad request (GET)");
+    res.status(400).send("Timestamp not found");
   }
 });
 

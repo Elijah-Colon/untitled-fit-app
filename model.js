@@ -4,33 +4,37 @@ const { Schema } = mongoose;
 
 mongoose.connect(process.env.DBPASSWORD);
 
-const UserSchema = Schema({
-  email: {
-    type: String,
-    required: [true, "User MUST have an email"],
-  },
-  name: {
-    type: String,
-  },
-  password: {
-    type: String,
-    required: [true, "User MUST have a password"],
-  },
-  rsw: {
-    type: Map,
-    of: {
-      reps: {
-        type: Number,
-      },
-      sets: {
-        type: Number,
-      },
-      weight: {
-        type: Number,
+const UserSchema = Schema(
+  {
+    email: {
+      type: String,
+      required: [true, "User MUST have an email"],
+    },
+    name: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: [true, "User MUST have a password"],
+    },
+    rsw: {
+      type: Map,
+      of: {
+        reps: {
+          type: Number,
+        },
+        sets: {
+          type: Number,
+        },
+        weight: {
+          type: Number,
+        },
       },
     },
+    time: { type: Date, default: Date.now },
   },
-});
+  { timestamps: true }
+);
 
 const WorkoutSchema = Schema({
   Name: {
@@ -74,35 +78,58 @@ const DaySchema = Schema({
   },
 });
 
-const WeekSchema = Schema({
-  name: {
-    type: String,
-    required: [true, "Week needs a name"],
-  },
-  dow: {
-    type: String,
-    required: false,
-  },
-  description: {
-    type: String,
-    required: [true, "Week needs a description"],
-  },
-  days: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Day",
-      required: [true, "Week needs days"],
+const WeekSchema = Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Week needs a name"],
     },
-  ],
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: [true, "A week needs an owner"],
+    dow: {
+      type: String,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: [true, "Week needs a description"],
+    },
+    days: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Day",
+        required: [true, "Week needs days"],
+      },
+    ],
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "A week needs an owner"],
+    },
+    reviews: {
+      type: String,
+    },
   },
-  reviews: {
-    type: String,
+  { timestamps: true }
+);
+
+const IncrSchema = Schema(
+  {
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [
+        true,
+        "You need to have a user to incriment (or however you spell it)",
+      ],
+    },
+    weekInt: {
+      type: Number,
+      enum: [0, 1, 2, 3, 4, 5, 6],
+      required: [true, "You need to tell if you've passed a week"],
+    },
+    time: { type: Date, default: Date.now },
   },
-});
+  { timestamps: true }
+);
 
 UserSchema.methods.setPassword = async function (plainPassword) {
   try {
@@ -122,10 +149,12 @@ const User = mongoose.model("User", UserSchema);
 const Workout = mongoose.model("Workout", WorkoutSchema);
 const Day = mongoose.model("Day", DaySchema);
 const Week = mongoose.model("Week", WeekSchema);
+const Time = mongoose.model("Time", IncrSchema);
 
 module.exports = {
   User,
   Workout,
   Day,
   Week,
+  Time,
 };
