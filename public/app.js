@@ -1,4 +1,6 @@
 const URL = "http://localhost:8080";
+const{createVuetify} = Vuetify;
+const vuetify = createVuetify()
 Vue.createApp({
   data() {
     return {
@@ -41,6 +43,7 @@ Vue.createApp({
         id: "",
         show: false,
       },
+      lastPage: "",
     };
   },
   methods: {
@@ -114,7 +117,12 @@ Vue.createApp({
     },
     // Page switch
     setPage: function (page) {
+      this.lastPage = this.currentPage;
       this.currentPage = page;
+    },
+
+    LastPage: function () {
+      this.currentPage = this.lastPage;
     },
     addworkout: function () {
       this.newWorkout.push({
@@ -124,14 +132,16 @@ Vue.createApp({
       });
     },
     removeWorkout: function (index) {
-      this.newWorkout.splice(index);
+      this.newWorkout.splice(index, 1);
     },
     removeWorkoutWeek: function (day, index) {
-      day.workout.splice(index);
+      console.log(day);
+      day.workout.splice(index, 1);
+      console.log(day.workout);
       console.log(this.newWeekDay);
     },
     removeDayWeek: function (index) {
-      this.newWeekDay.splice(index);
+      this.newWeekDay.splice(index, 1);
     },
     createDay: async function () {
       let myHeaders = new Headers();
@@ -276,6 +286,7 @@ Vue.createApp({
         this.user.email = "";
         this.user.password = "";
         this.currentPage = "Browse";
+        console.log(this.currentUser);
       } else {
         console.log("Failed to log in");
       }
@@ -285,6 +296,7 @@ Vue.createApp({
       if (response.status === 200) {
         let data = await response.json();
         this.currentUser = data;
+        console.log(this.currentUser);
         this.currentPage = "Browse";
       } else {
         this.currentPage = "login";
@@ -297,7 +309,7 @@ Vue.createApp({
         method: "DELETE",
       };
       let response = await fetch(`${URL}/session`, requestOptions);
-      if (resposne.status === 204) {
+      if (response.status === 204) {
         this.currentPage = "login";
         this.currentUser = null;
       }
@@ -342,6 +354,83 @@ Vue.createApp({
           .includes(weeksworkout.searchInput.toLowerCase());
       });
     },
+    deleteDay: async function (dayID) {
+      console.log(dayID);
+      let requestOptions = {
+        method: "DELETE",
+      };
+      for (let element of this.ownedFilteredWeeks) {
+        console.log(element);
+        for (let day of element.days) {
+          if (day._id === dayID) {
+            if (this.trys === 0) {
+              alert(
+                "this day is within a week. If you want to remove this try again"
+              );
+              this.lastTryDelete = dayID;
+              this.trys++;
+              return;
+            } else if (this.lastTryDelete === dayID) {
+              break;
+            } else {
+              alert(
+                "this day is within a week. If you want to remove this hit the delete button again"
+              );
+              this.lastTryDelete = dayID;
+              return;
+            }
+          }
+        }
+      }
+      let response = await fetch(`${URL}/days/${dayID}`, requestOptions);
+      console.log(response);
+      this.trys = 0;
+      this.lastTryDelete = null;
+      if (response.status === 204) {
+        this.getDays();
+      } else {
+        alert("Failed to delete");
+      }
+    },
+
+    deleteWeek: async function (weekID) {
+      console.log(weekID);
+      let requestOptions = {
+        method: "DELETE",
+      };
+      let response = await fetch(`${URL}/weeks/${weekID}`, requestOptions);
+      console.log(response);
+      if (response.status === 204) {
+        this.getWeeks();
+      } else {
+        alert("Failed to delete");
+      }
+    },
+    editWeek: async function (weekID) {
+      this.clearWeek();
+      this.clearday();
+      console.log(weekID);
+      let response = await fetch(`${URL}/weeks/${weekID}`);
+      let data = await response.json();
+      this.currentWeek = data;
+
+      console.log(this.newWeekDay);
+      console.log("DATA", data);
+      console.log("week", this.currentWeek);
+      for (let element of this.currentWeek[0].days) {
+        console.log(element);
+        let newDay = {
+          name: "",
+          workout: [],
+          id: "",
+          show: true,
+        };
+        newDay.id = element._id;
+        newDay.name = element.name;
+        this.newWeekDay.push(newDay);
+      }
+    },
+    editDay: async function (dayID) {},
   },
   computed: {
     filteredDays: function () {
@@ -357,8 +446,17 @@ Vue.createApp({
     },
 
     ownedFilteredDays: function () {
+      console.log('1')
       return this.filteredDays.filter((day) => {
         return day.owner._id.toString() == this.currentUser.userID.toString();
+        
+      });
+    },
+
+    ownedFilteredWeeks: function () {
+      console.log('2')
+      return this.filteredWeeks.filter((week) => {
+        return week.owner._id.toString() == this.currentUser.userID.toString();
       });
     },
   },
@@ -372,4 +470,4 @@ Vue.createApp({
     this.getWeeks();
     this.getSession();
   },
-}).mount("#app");
+}).use(vuetify).mount("#app");
