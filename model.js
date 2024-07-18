@@ -111,6 +111,52 @@ const WeekSchema = Schema(
   { timestamps: true }
 );
 
+const PersonalSchema = Schema({
+  name: {
+    type: String,
+    required: [true, "week needs a name"],
+  },
+  dow: {
+    type: String,
+    required: false,
+  },
+  description: {
+    type: String,
+    required: [true, "Week needs a description"],
+  },
+  days: [
+    {
+      name: {
+        type: String,
+        required: [true, "Day needs a name"],
+      },
+      workouts: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Workout",
+          required: [true, "day needs a workout"],
+        },
+      ],
+      owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "A day needs an owner"],
+      },
+      reviews: {
+        type: String,
+      },
+    },
+  ],
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "A week needs an owner"],
+  },
+  reviews: {
+    type: String,
+  },
+});
+
 const IncrSchema = Schema(
   {
     owner: {
