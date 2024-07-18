@@ -1,4 +1,6 @@
 const URL = "http://localhost:8080";
+const{createVuetify} = Vuetify;
+const vuetify = createVuetify()
 Vue.createApp({
   data() {
     return {
@@ -444,12 +446,15 @@ Vue.createApp({
     },
 
     ownedFilteredDays: function () {
+      console.log('1')
       return this.filteredDays.filter((day) => {
         return day.owner._id.toString() == this.currentUser.userID.toString();
+        
       });
     },
 
     ownedFilteredWeeks: function () {
+      console.log('2')
       return this.filteredWeeks.filter((week) => {
         return week.owner._id.toString() == this.currentUser.userID.toString();
       });
@@ -465,4 +470,4 @@ Vue.createApp({
     this.getWeeks();
     this.getSession();
   },
-}).mount("#app");
+}).use(vuetify).mount("#app");
