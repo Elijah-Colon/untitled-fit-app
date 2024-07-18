@@ -273,6 +273,7 @@ app.post("/session", async (request, response) => {
     }
     request.session.userID = user._id;
     request.session.name = user.name;
+    request.session.rsw = user.rsw;
     // console.log("request session", request.session);
 
     response.status(201).send(request.session);
