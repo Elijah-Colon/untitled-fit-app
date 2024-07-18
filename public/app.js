@@ -1,6 +1,6 @@
 const URL = "http://localhost:8080";
-const{createVuetify} = Vuetify;
-const vuetify = createVuetify()
+const { createVuetify } = Vuetify;
+const vuetify = createVuetify();
 Vue.createApp({
   data() {
     return {
@@ -44,6 +44,8 @@ Vue.createApp({
         show: false,
       },
       lastPage: "",
+      editingweek: [],
+      editingday: [],
     };
   },
   methods: {
@@ -245,6 +247,12 @@ Vue.createApp({
         name: "",
         workouts: [],
       };
+      this.newWorkout = [
+        {
+          work: "",
+          searchInput: "",
+        },
+      ];
     },
 
     //  this is for register
@@ -428,9 +436,16 @@ Vue.createApp({
         newDay.id = element._id;
         newDay.name = element.name;
         this.newWeekDay.push(newDay);
+        this.editingweek = weekID;
       }
     },
-    editDay: async function (dayID) {},
+    editDay: async function (dayID) {
+      console.log(dayID);
+      currentPage = "editDay";
+      let response = await fetch(`${URL}/days/${dayID}`);
+      this.editingday = response.json();
+      console.log(editingday);
+    },
   },
   computed: {
     filteredDays: function () {
@@ -446,15 +461,14 @@ Vue.createApp({
     },
 
     ownedFilteredDays: function () {
-      console.log('1')
+      console.log("1");
       return this.filteredDays.filter((day) => {
         return day.owner._id.toString() == this.currentUser.userID.toString();
-        
       });
     },
 
     ownedFilteredWeeks: function () {
-      console.log('2')
+      console.log("2");
       return this.filteredWeeks.filter((week) => {
         return week.owner._id.toString() == this.currentUser.userID.toString();
       });
@@ -470,4 +484,6 @@ Vue.createApp({
     this.getWeeks();
     this.getSession();
   },
-}).use(vuetify).mount("#app");
+})
+  .use(vuetify)
+  .mount("#app");
