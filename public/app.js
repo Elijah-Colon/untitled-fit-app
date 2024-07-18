@@ -309,7 +309,7 @@ Vue.createApp({
       let response = await fetch(`${URL}/session`, requestOptions);
       if (response.status === 204) {
         this.currentPage = "login";
-        this.currentUser = null;
+        this.currentUser = {};
       }
     },
     sortWorkouts: function (sort) {
