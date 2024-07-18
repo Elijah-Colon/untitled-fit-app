@@ -14,9 +14,22 @@
         <p class="navButton" @click="setPage('Browse')">Browse</p>
         <p class="navButton" @click="setPage('create')">Create</p>
         <p class="navButton" @click="setPage('aboutUs')">About</p>
-        <p class="navButton" @click="setPage('personal')">Mine</p>
+        <p
+          v-if="currentUser.userID"
+          class="navButton"
+          @click="setPage('personal')"
+        >
+          Mine
+        </p>
         <!-- want to change this when ready -->
-        <button @click="setPage('login')" v-if="currentPage !== 'login' ">
+        <button v-if="currentUser.userID" @click="deleteSession()">
+          Logout
+        </button>
+        <button
+          v-else
+          @click="setPage('login')"
+          v-if="currentPage !== 'login' "
+        >
           Login
         </button>
       </nav>
@@ -33,7 +46,7 @@
           class="Browse"
           v-if="sort === 'day'"
           v-for="(workout, index) in filteredDays"
-          @click="openDay(workout._id)"
+          @click="openDay(workout._id) , setPage('singleDay')"
         >
           <div>{{workout.name}}</div>
         </div>
@@ -41,7 +54,7 @@
           class="Browse"
           v-if="sort === 'week'"
           v-for="(workout,index) in filteredWeeks"
-          @click="openWeek(workout._id)"
+          @click="openWeek(workout._id), setPage('singleWeek')"
         >
           <div>{{workout.name}}</div>
         </div>
@@ -88,8 +101,16 @@
         </form>
       </div>
       <div v-if="currentPage === 'create'" class="createPage">
-        <button @click="setPage('Cday')">Create a day</button>
-        <button @click="setPage('Cweek')">Create a Week</button>
+        <button v-if="currentUser.userID" @click="setPage('Cday')">
+          Create a day
+        </button>
+        <button v-else @click="setPage('login')">Create a day</button>
+
+        <button v-if="currentUser.userID" @click="setPage('Cweek')">
+          Create a Week
+        </button>
+        <!-- could add a function to put up an alert  -->
+        <button v-else @click="setPage('login')">Create a Week</button>
       </div>
       <div v-if="currentPage ==='aboutUs'"></div>
       <div v-if="currentPage === 'Cday'">
@@ -110,11 +131,11 @@
         </div>
         <button @click="addworkout()">add workout</button>
         <button @click="createDay()">Create</button>
-        <button @click="setPage('create')">Back</button>
+        <button @click="LastPage()">Back</button>
       </div>
 
       <div v-if="currentPage === 'Cweek'">
-        <button @click="setPage('create')">Back</button>
+        <button @click="LastPage()">Back</button>
         <!-- WEEKS PAGE  -->
         <h3>Create week</h3>
         <p>title</p>
@@ -175,32 +196,110 @@
       </div>
 
       <div v-if="currentPage === 'singleWeek'">
-        <button @click="currentPage = 'Browse'">Back</button>
+        <button @click="LastPage()">Back</button>
         <div class="day-in-week" v-for="day in currentWeek">
-          <h1>hello boi</h1>
           <h2>{{currentWeek.name}}</h2>
-          <p>{{currentWeek.description}}</p>
-          <p>{{currentWeek.dow}}</p>
+
           <div class="day-miau">
             <h3>{{day.name}}</h3>
+            {{day.description}} {{day.dow}}
+          </div>
+          <div v-for="days in day.days">
+            {{days.name}}
+            <div v-for="workouts in days.workouts">
+              {{workouts.name}}
+              <div>{{workouts.category}}</div>
+              <div>{{workouts.force}}</div>
+            </div>
           </div>
         </div>
       </div>
 
       <div v-if="currentPage === 'singleDay'">
-        <button @click="currentPage = 'Browse'">Back</button>
+        <button @click="LastPage()">Back</button>
         <div class="workout-in-day" v-for="workout in currentDay.workouts">
-          {{workout}}
+          {{currentDay.name}} {{workout.name}} {{workout.primaryMuscles}}
         </div>
       </div>
 
       <div v-if="currentPage === 'personal'">
+        <div v-for="(workout, index) in filteredWeeks">
+          <div v-if="workout.owner._id === currentUser.userID">
+            <p @click="openWeek(workout._id) , setPage('singleWeek')">
+              {{workout.name}}
+            </p>
+            <button @click="deleteWeek(workout._id)">Delete</button>
+            <button @click="editWeek(workout._id), setPage('editWeek')">
+              Edit week
+            </button>
+          </div>
+        </div>
         <div v-for="(workout,index)  in filteredDays">
           <div v-if="workout.owner._id === currentUser.userID">
-            {{workout.name}}
+            <p @click="openDay(workout._id), setPage('singleDay')">
+              {{workout.name}}
+            </p>
+
+            <button @click="deleteDay(workout._id)">Delete</button>
+            <button @click="editDay(workout._id) , setPage('editDay')">
+              Edit
+            </button>
           </div>
         </div>
       </div>
+      <div v-if="currentPage === 'editWeek'">
+        <div>Editing</div>
+        <div>
+          Title
+          <input type="text" v-model="currentWeek[0].name" />
+          Description
+          <input type="text" v-model="currentWeek[0].description" />
+          <div v-for="(day,Dayindex) in newWeekDay">
+            <p v-if="day.id != '' || !day.show">
+              {{day.name}} {{day.id}}
+              <button v-if="day.id != ''" @click="editDay(Dayindex)">
+                Edit
+              </button>
+            </p>
+            <div v-else>
+              <div>Day Name</div>
+              <input type="text" v-model="day.name" placeholder="Title..." />
+              <!-- adding a workout -->
+              <button @click="makeWorkout(Dayindex)">add workout</button>
+              <button @click="removeDayWeek(Dayindex)">Delete</button>
+              <div v-for="(workouts, index) in day.workout">
+                <input type="text" v-model="workouts.searchInput" />
+                <select v-model="workouts.work">
+                  <option
+                    v-for=" workout in filteredWorkouts(workouts)"
+                    v-bind:value="workout._id"
+                  >
+                    {{workout.name}}
+                  </option>
+                </select>
+                <button @click="removeWorkoutWeek(day,index)">remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="modal" v-show="!modalOpen">
+            <div class="content">
+              <div id="close" @click="toggleModal()">X</div>
+              <input type="text" v-model="searchInput" />
+              <!-- need to fix this to where it only shows the users ones and not all the ones in the database -->
+
+              <select v-model="modal.id">
+                <option v-for="day in ownedFilteredDays" v-bind:value="day._id">
+                  {{day.name}}
+                </option>
+              </select>
+              <button v-on:click="updateNewWeekday()">Save</button>
+            </div>
+          </div>
+          <button @click="addDay()">Create Day</button>
+          <button @click="toggleModal()">Add Day</button>
+        </div>
+      </div>
+      <div v-if="currentPage === 'editWeek'"></div>
     </div>
     <script src="app.js"></script>
   </body>
