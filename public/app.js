@@ -1,5 +1,4 @@
 const URL = "http://localhost:8080";
-
 Vue.createApp({
   data() {
     return {
@@ -22,6 +21,7 @@ Vue.createApp({
       newWorkout: [
         {
           work: "",
+          searchInput: "",
         },
       ],
       sort: "",
@@ -30,12 +30,20 @@ Vue.createApp({
       currentDay: [],
       newWeek: {
         name: "",
-        desciption: "",
+        description: "",
         days: [],
       },
       newWeekDay: [],
       timestamp: "",
       weekInt: null,
+      modalOpen: true,
+      modal: {
+        name: "",
+        workout: [],
+        id: "",
+        show: false,
+        incrUser: {},
+      },
     };
   },
   methods: {
@@ -68,8 +76,36 @@ Vue.createApp({
         name: "",
         workout: [],
         id: "",
+        show: true,
       });
     },
+    toggleModal: function () {
+      this.modalOpen = !this.modalOpen;
+    },
+    updateNewWeekday: async function () {
+      if (this.modal.id != "") {
+        let response = await fetch(`${URL}/days/${this.modal.id}`);
+        let data = await response.json();
+        let modal = {
+          name: "",
+          workout: [],
+          id: "",
+          show: false,
+        };
+        modal.name = data.name;
+        modal.id = this.modal.id;
+        this.newWeekDay.push(modal);
+        console.log("LOCal", modal);
+        console.log("modal", this.modal);
+        console.log("week", this.newWeekDay);
+        this.modal.name = "";
+        this.modal.id = "";
+        this.toggleModal();
+      } else {
+        alert("Please enter a day");
+      }
+    },
+
     makeWorkout: function (index) {
       console.log(this.newWeekDay);
       console.log(index);
@@ -92,14 +128,18 @@ Vue.createApp({
     },
     removeWorkout: function (index) {
       this.newWorkout.splice(index);
-      console.log(this.newWorkout);
+    },
+    removeWorkoutWeek: function (day, index) {
+      day.workout.splice(index);
+      console.log(this.newWeekDay);
+    },
+    removeDayWeek: function (index) {
+      this.newWeekDay.splice(index);
     },
     createDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
       this.newWorkout.forEach((element) => {
-        console.log(element);
         this.newDay.workouts.push(element.work);
       });
       let requestOptions = {
@@ -123,15 +163,16 @@ Vue.createApp({
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 
-      this.newWeekDay.forEach(async (element) => {
+      for (let element of this.newWeekDay) {
         console.log(element.id);
+        console.log(element);
         console.log(element.id === "");
         if (element.id === "") {
           this.newDay.name = element.name;
           // this.newDay.name.push(element.name);
-          element.workout.forEach((id) => {
+          for (let id of element.workout) {
             this.newDay.workouts.push(id.work);
-          });
+          }
           //
           // end of second loop
           //
@@ -157,28 +198,34 @@ Vue.createApp({
             console.log("Failed to make weekday");
           }
         } else {
+          console.log("YOOO IT WORKS");
           days.push(element.id.toString());
+          console.log(days);
         }
-      });
+      }
 
       this.newWeek.days = days;
     },
     createWeek: async function () {
       await this.createWeekdays();
+
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
+      console.log("OUTSIDE");
 
       let requestOptions = {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(this.newWeek),
       };
-
+      console.log(this.newWeek);
       let response = await fetch(`${URL}/weeks`, requestOptions);
       console.log(response);
       if (response.status === 201) {
         this.getDays();
+        this.getWeeks();
         this.clearday();
+        this.clearWeek();
         this.currentPage = "Browse";
         console.log("Succesfully created");
       } else {
@@ -192,6 +239,7 @@ Vue.createApp({
         workouts: [],
       };
     },
+
     //  this is for register
     registerUser: async function () {
       console.log(this.user);
@@ -206,7 +254,7 @@ Vue.createApp({
       let response = await fetch(`${URL}/users`, requestOptions);
       if (response.status === 201) {
         console.log("Successfully registered");
-        this.loginUser();
+        this.newTimestamp();
       } else {
         console.log("failed to register");
       }
@@ -236,6 +284,31 @@ Vue.createApp({
         console.log("Failed to log in");
       }
     },
+
+    loginUserIncr: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(this.user),
+      };
+      let response = await fetch(`${URL}/session`, requestOptions);
+      let data = await response.json();
+
+      if (response.status === 201) {
+        console.log("successfully logged in");
+        this.currentUser = data;
+        this.user.name = "";
+        this.user.email = "";
+        this.user.password = "";
+        this.currentPage = "Browse";
+      } else {
+        console.log("Failed to log in");
+      }
+    },
+
     getSession: async function () {
       let response = await fetch(`${URL}/session`);
       if (response.status === 200) {
@@ -266,9 +339,10 @@ Vue.createApp({
     openWeek: async function (weekID) {
       let response = await fetch(`${URL}/weeks/${weekID}`);
       let data = await response.json();
-      this.currentWeek = data[0];
+      this.currentWeek = data;
       this.currentPage = "singleWeek";
-      console.log(this.currentWeek.days);
+      console.log("DATA", data);
+      console.log(this.currentWeek);
     },
 
     openDay: async function (dayID) {
@@ -284,25 +358,41 @@ Vue.createApp({
     getTimestamp: async function () {
       let res = await fetch(`${URL}/time/${this.currentUser.userID}`);
       let data = await res.json();
+      console.log("data", data);
       this.timestamp = data.time;
       this.weekInt = data.weekInt;
       let day = new Date(this.timestamp);
       this.weekInt = day.getDay();
+      if (res.status === 404) {
+        return false;
+      }
     },
     createTimestamp: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
+      console.log("timestamp", this.timestamp);
 
       let day = new Date(this.timestamp);
       dayNum = day.getDay();
+      console.log(day.getDay());
+      console.log("2");
+
+      console.log(dayNum);
+
+      let reqBody = {
+        weekInt: dayNum,
+      };
+      console.log("3");
 
       let requestOptions = {
         method: "POST",
         headers: myHeaders,
-        body: JSON.stringify(dayNum),
+        body: JSON.stringify(reqBody),
       };
+      console.log("4");
 
       let res = await fetch(`${URL}/time`, requestOptions);
+      console.log("5");
       if (res.status === 201) {
         console.log("Timestamp made");
       } else {
@@ -312,14 +402,20 @@ Vue.createApp({
     updateTimestamp: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
-      let day = new Date(this.timestamp);
+      console.log("timestamp", this.timestamp);
+      let day = new Date();
       dayNum = day.getDay();
+
+      console.log(dayNum);
+
+      let reqBody = {
+        weekInt: dayNum,
+      };
 
       let requestOptions = {
         method: "PUT",
         headers: myHeaders,
-        body: JSON.stringify(dayNum),
+        body: JSON.stringify(reqBody),
       };
 
       let res = await fetch(`${URL}/time/${this.user._id}`, requestOptions);
@@ -330,19 +426,76 @@ Vue.createApp({
         console.log("failed to update Timestamp");
       }
     },
+
+    getIncrUser: async function () {
+      let res = await fetch(`${URL}/users/${this.currentUser.userID}`);
+      let data = await res.json();
+      this.incrUser = data;
+      this.timestamp = data.time;
+      let thisDay = new Date();
+      dayNum = thisDay.getDay();
+
+      this.weekInt = dayNum;
+      console.log("week number", this.weekInt);
+    },
+
+    updateUser: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let rsw = {};
+    },
+
     runTimestamp: async function () {
       await this.getTimestamp();
       oldNum = this.weekInt;
-      this.updateTimestamp(this.user._id);
-      await this.getTimestamp();
+      this.updateTimestamp();
+      await this.getIncrUser();
       newNum = this.weekInt;
+      if (newNum < oldNum) {
+        console.log("change");
+        await this.getIncrUser();
+        for (let workoutID of Object.keys(this.incrUser.rsw)) {
+          this.incrUser.rsw[workoutID].weight += 5;
+          console.log(this.incrUser.rsw[workoutID].weight);
+        }
+      } else {
+        console.log("No change");
+      }
+    },
+
+    newTimestamp: async function () {
+      await this.loginUserIncr();
+      await this.getIncrUser();
+      await this.createTimestamp();
+      await this.getTimestamp();
+      console.log("Timestamp made");
+    },
+
+    clearWeek: function () {
+      (this.newWeekDay = []),
+        (this.newDay = {
+          name: "",
+          workouts: [],
+        });
+      this.newWeek = {
+        name: "",
+        description: "",
+        days: [],
+      };
+    },
+    filteredWorkouts: function (weeksworkout) {
+      return this.workouts.filter((workout) => {
+        return workout.name
+          .toLowerCase()
+          .includes(weeksworkout.searchInput.toLowerCase());
+      });
     },
   },
   computed: {
     filteredDays: function () {
       return this.days.filter((day) => {
         return day.name.toLowerCase().includes(this.searchInput.toLowerCase());
-        console.log(this.days);
       });
     },
 
@@ -351,11 +504,10 @@ Vue.createApp({
         return week.name.toLowerCase().includes(this.searchInput.toLowerCase());
       });
     },
-    filteredWorkouts: function () {
-      return this.workouts.filter((workout) => {
-        return workout.name
-          .toLowerCase()
-          .includes(this.searchInput.toLowerCase());
+
+    ownedFilteredDays: function () {
+      return this.filteredDays.filter((day) => {
+        return day.owner._id.toString() == this.currentUser.userID.toString();
       });
     },
   },

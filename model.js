@@ -4,33 +4,37 @@ const { Schema } = mongoose;
 
 mongoose.connect(process.env.DBPASSWORD);
 
-const UserSchema = Schema({
-  email: {
-    type: String,
-    required: [true, "User MUST have an email"],
-  },
-  name: {
-    type: String,
-  },
-  password: {
-    type: String,
-    required: [true, "User MUST have a password"],
-  },
-  rsw: {
-    type: Map,
-    of: {
-      reps: {
-        type: Number,
-      },
-      sets: {
-        type: Number,
-      },
-      weight: {
-        type: Number,
+const UserSchema = Schema(
+  {
+    email: {
+      type: String,
+      required: [true, "User MUST have an email"],
+    },
+    name: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: [true, "User MUST have a password"],
+    },
+    rsw: {
+      type: Map,
+      of: {
+        reps: {
+          type: Number,
+        },
+        sets: {
+          type: Number,
+        },
+        weight: {
+          type: Number,
+        },
       },
     },
+    time: { type: Date, default: Date.now },
   },
-});
+  { timestamps: true }
+);
 
 const WorkoutSchema = Schema({
   Name: {
