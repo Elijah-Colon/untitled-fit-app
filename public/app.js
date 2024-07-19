@@ -1,6 +1,10 @@
 const URL = "http://localhost:8080";
 const { createVuetify } = Vuetify;
-const vuetify = createVuetify();
+const vuetify = createVuetify({
+  icons: {
+    defaultSet: "mdi",
+  },
+});
 Vue.createApp({
   data() {
     return {
@@ -13,6 +17,7 @@ Vue.createApp({
         email: "",
         password: "",
         _id: "",
+        rsw: [],
       },
       searchInput: "",
 
@@ -47,11 +52,31 @@ Vue.createApp({
         incrUser: {},
       },
       lastPage: "",
-      editingweek: [],
       editingday: [],
+      editingdayWorkouts: [],
+      warning: 0,
+      rswSetups: [],
+      inputRWS: {
+        workoutID: "",
+        rsw: {
+          reps: 0,
+          sets: 0,
+          weight: 0,
+        },
+        amount: 1,
+      },
+      checkers: [
+        {
+          checker: true,
+        },
+      ],
     };
   },
   methods: {
+    addRSW: function (index) {
+      this.rswSetups.push(this.inputRWS);
+      this.checkers[index].checker = false;
+    },
     // Workouts
     getWorkouts: async function () {
       let response = await fetch(`${URL}/workouts`);
@@ -134,6 +159,9 @@ Vue.createApp({
         work: {},
         searchInput: "",
         filterWorkout: [],
+      });
+      this.checkers.push({
+        checker: true,
       });
     },
     removeWorkout: function (index) {
@@ -585,15 +613,146 @@ Vue.createApp({
         newDay.id = element._id;
         newDay.name = element.name;
         this.newWeekDay.push(newDay);
-        this.editingweek = weekID;
       }
+    },
+
+    addworkoutDayEdit: function (index) {
+      this.editingdayWorkouts.push({
+        searchInput: "",
+        work: "",
+      });
+    },
+
+    removeDayWorkoutEdit: function (index) {
+      this.editingdayWorkouts.splice(index, 1);
+      console.log(this.editingdayWorkouts);
     },
     editDay: async function (dayID) {
       console.log(dayID);
-      currentPage = "editDay";
       let response = await fetch(`${URL}/days/${dayID}`);
-      this.editingday = response.json();
-      console.log(editingday);
+      this.editingday = await response.json();
+      console.log("day", this.editingday);
+      for (let element of this.editingday.workouts) {
+        this.editingdayWorkouts.push({
+          searchInput: "",
+          work: element._id,
+        });
+      }
+      console.log(this.editingdayWorkouts);
+    },
+    clearEditDay: function () {
+      this.editingday = [];
+      this.editingdayWorkouts = [];
+      this.warning = 0;
+      console.log(this.editingday);
+      console.log(this.editingdayWorkouts);
+    },
+    UpdateWeekDay: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      console.log("1", this.editingday);
+      this.editingday.workouts = [];
+      for (let element of this.editingdayWorkouts) {
+        console.log(element.work);
+        this.editingday.workouts.push(element.work);
+      }
+      console.log("2", this.editingday);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(this.editingday),
+      };
+      let dayID = this.editingday._id;
+      let response = await fetch(`${URL}/days/${dayID}`, requestOptions);
+      if (response.status === 204) {
+        this.getDays();
+        this.clearEditDay();
+      } else {
+        console.log("Failed to update quiz");
+      }
+    },
+    Warn: function () {
+      alert("This will get rid of all progress");
+      this.warning = 1;
+    },
+    saveWeek: async function () {
+      let days = [];
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      for (let element of this.newWeekDay) {
+        console.log(element.id);
+        console.log(element);
+        console.log(element.id === "");
+        if (element.id === "") {
+          this.newDay.name = element.name;
+          // this.newDay.name.push(element.name);
+          for (let id of element.workout) {
+            this.newDay.workouts.push(id.work);
+          }
+          //
+          // end of second loop
+          //
+
+          let requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: JSON.stringify(this.newDay),
+          };
+          let response = await fetch(`${URL}/days`, requestOptions);
+          let data = await response.json();
+          console.log("ID", data._id);
+
+          days.push(data._id.toString());
+          console.log("inside loop", days);
+
+          console.log("new week object", this.currentWeek);
+          console.log(response);
+          if (response.status === 201) {
+            this.clearday();
+            console.log("Succesfully created");
+          } else {
+            console.log("Failed to make weekday");
+          }
+        } else {
+          console.log("YOOO IT WORKS");
+          days.push(element.id.toString());
+          console.log(days);
+        }
+      }
+      console.log(this.currentWeek);
+      this.currentWeek[0].days = days;
+    },
+    updateWeek: async function () {
+      await this.saveWeek();
+
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(this.currentWeek[0]),
+      };
+      let weekID = this.currentWeek[0]._id;
+      console.log(weekID);
+      let response = await fetch(`${URL}/weeks/${weekID}`, requestOptions);
+      if (response.status === 204) {
+        this.getDays();
+        this.clearEditDay();
+        this.cleareditWeek();
+        this.clearday();
+      } else {
+        console.log("Failed to update week");
+      }
+    },
+    cleareditWeek: function () {
+      this.currentWeek = [];
+      this.newWeekDay = [];
+    },
+    removeWEEKDAy: function (index) {
+      this.newWeekDay.splice(index, 1);
     },
   },
   computed: {

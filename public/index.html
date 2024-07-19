@@ -9,6 +9,8 @@
       href="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.6.13/vuetify-labs.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.min.css">
     <title>Document</title>
   </head>
   <body>
@@ -137,12 +139,12 @@
         <p>Title</p>
         <v-text-field label="Title" v-model="newDay.name"></v-text-field>
         <p>Workouts</p>
-        <div v-for="(workout, index) in newWorkout">
+        <div  v-for="(workout, index) in newWorkout">
           <v-text-field
             label="Search"
             v-model="workout.searchInput"
           ></v-text-field>
-
+<div class="workouts">
           <v-select
             v-model="workout.work"
             :items="filteredWorkouts(workout)"
@@ -151,7 +153,44 @@
             filled
             return
           >
+
+
           </v-select>
+            <div v-for="(rsw, index) in rswSetups">            reps
+              <v-number-input
+              v-model="rsw.rsw.reps"
+              :reverse="false"
+              control-variant="stack"
+              label=""
+              :hideInput="false"
+              :inset="false"
+            ></v-number-input>  </div>
+      <div v-for="(rsw, index) in rswSetups">          
+          sets
+          <v-number-input
+          v-model="rsw.rsw.sets"
+          :reverse="false"
+          control-variant="stack"
+          label=""
+          :hideInput="false"
+          :inset="false"
+        ></v-number-input> 
+        </div>
+      <div v-for="(rsw, index) in rswSetups">   
+        weight
+        <v-number-input
+        v-model="rsw.rsw.weight"
+        :reverse="false"
+        control-variant="stack"
+        label=""
+        :hideInput="false"
+        :inset="false"
+      ></v-number-input> 
+    </div>
+   
+   
+        </div>
+          <v-btn v-if="checkers[index].checker"  @click="addRSW(index)">Add weight/sets/reps</v-btn>
           <v-btn @click="removeWorkout(index)">remove</v-btn>
         </div>
         <v-btn @click="addworkout()">add workout</v-btn>
@@ -235,7 +274,6 @@
       <div v-if="currentPage === 'singleWeek'">
         <v-btn @click="LastPage()">Back</v-btn>
         <div class="day-in-week" v-for="day in currentWeek">
-          <h2>{{currentWeek.name}}</h2>
 
           <div class="day-miau">
             <h3>{{day.name}}</h3>
@@ -291,6 +329,8 @@
        -->
       <div v-if="currentPage === 'editWeek'">
         <div>Editing</div>
+        <v-btn v-if="warning === 0" @click="Warn()">Back</v-btn>
+        <v-btn v-else @click="setPage('personal'), clearEditDay(), cleareditWeek(), clearday()">Back</v-btn>
         <div>
           Title
           <v-text-field type="text" v-model="currentWeek[0].name">
@@ -301,7 +341,18 @@
           <div v-for="(day,Dayindex) in newWeekDay">
             <p v-if="day.id != '' || !day.show">
               {{day.name}} {{day.id}}
-              <v-btn v-if="day.id != ''" @click="editDay(day.id)"> Edit </v-btn>
+              <v-btn
+                v-if="day.id != ''"
+                @click="editDay(day.id), setPage('editDay')"
+              >
+                Edit
+              </v-btn>
+              <v-btn
+              v-if="day.id != ''"
+              @click="removeWEEKDAy(Dayindex)"
+            >
+              Remove
+            </v-btn>
             </p>
             <div v-else>
               <div>Day Name</div>
@@ -314,17 +365,17 @@
               <!-- adding a workout -->
               <v-btn @click="makeWorkout(Dayindex)">add workout</v-btn>
               <v-btn @click="removeDayWeek(Dayindex)">Delete</v-btn>
-              <div v-for="(workouts, index) in day.workout">
-                <v-text-field type="text" v-model="workouts.searchInput">
+              <div v-for="(workout, index) in day.workout">
+                <v-text-field type="text" v-model="workout.searchInput">
                 </v-text-field>
-                <select v-model="workouts.work">
-                  <option
-                    v-for=" workout in filteredWorkouts(workouts)"
-                    v-bind:value="workout._id"
-                  >
-                    {{workout.name}}
-                  </option>
-                </select>
+                <v-select
+                v-model="workout.work"
+                :items="filteredWorkouts(workout)"
+                item-title="name"
+                item-value="_id"
+                filled
+              >
+              </v-select>
                 <v-btn @click="removeWorkoutWeek(day,index)">remove</v-btn>
               </div>
             </div>
@@ -345,13 +396,44 @@
           </div>
           <v-btn @click="addDay()">Create Day</v-btn>
           <v-btn @click="toggleModal()">Add Day</v-btn>
+          <v-btn @click="updateWeek() , setPage('personal')">Save</v-btn>
         </div>
       </div>
-      <div v-if="currentPage === 'editWeek'"></div>
+      <div v-if="currentPage === 'editDay'">
+        <v-btn v-if="warning === 0" @click="Warn()">Back
+        </v-btn>
+        <v-btn v-else @click="LastPage(),   clearEditDay()">Back</v-btn>
+        Title
+        <v-text-field type="text" v-model="editingday.name"> </v-text-field>
+
+        <div v-for="(workout, index) in editingdayWorkouts">
+          <v-text-field
+            label="Search"
+            v-model="workout.searchInput"
+          ></v-text-field>
+
+          <v-select
+            v-model="workout.work"
+            :items="filteredWorkouts(workout)"
+            item-title="name"
+            item-value="_id"
+            filled
+            return
+          >
+          </v-select>
+
+          <v-btn @click="removeDayWorkoutEdit(index)">Remove</v-btn>
+
+      </div>
+      <v-btn @click="addworkoutDayEdit(index)">Add workout</v-btn>
+      <v-btn @click="UpdateWeekDay(),setPage('editWeek')">Save</v-btn>
+
     </div>
     <!-- Vue and Vuetify JavaScript -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.6.13/vuetify-labs.min.js"></script>
+
     <script src="app.js"></script>
   </body>
 </html>

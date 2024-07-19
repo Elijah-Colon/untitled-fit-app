@@ -29,6 +29,7 @@ async function AuthMiddleware(request, response, next) {
     }
     // if they are autheticated just pass them to the endpoint
     request.user = user;
+    console.log("REQUEST", request.user);
     next();
   } else {
     return response.status(401).send("unauthenticated");
@@ -148,8 +149,8 @@ app.put("/days/:id", AuthMiddleware, async function (request, response) {
       response.status(404).send("Could not find that workout");
       return;
     }
-    // console.log(request.session._id, day.owner);
-    if (request.userID.toString() !== day.owner.toString()) {
+    console.log("Session", request.user._id, "OWNER", day.owner);
+    if (request.user._id.toString() === day.owner._id.toString()) {
       // console.log("miau");
       day.name = request.body.name;
       day.workouts = request.body.workouts;
@@ -289,6 +290,7 @@ app.post("/session", async (request, response) => {
 
 app.put("/weeks/:id", AuthMiddleware, async function (request, response) {
   try {
+    console.log("request", request.body);
     let week = await model.Week.findOne({
       _id: request.params.id,
       owner: request.session.userID,
@@ -298,8 +300,10 @@ app.put("/weeks/:id", AuthMiddleware, async function (request, response) {
       response.status(404).send("could not find that workout");
       return;
     }
+    console.log("week", week);
     // This might not be needed as when we go to fecth the week we also pass in the owner and it will only return the one with the owner the same as the session id.
     if (request.user._id.toString() === week.owner._id.toString()) {
+      console.log("TESTING");
       week.name = request.body.name;
       week.dow = request.body.dow;
       week.description = request.body.description;
@@ -307,6 +311,7 @@ app.put("/weeks/:id", AuthMiddleware, async function (request, response) {
     }
     const error = await week.validateSync();
     if (error) {
+      console.log("Hello");
       response.status(402).send(error);
       return;
     }
