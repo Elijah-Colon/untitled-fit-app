@@ -47,6 +47,7 @@ Vue.createApp({
         incrUser: {},
       },
       lastPage: "",
+      personalDay: [],
     };
   },
   methods: {
@@ -580,6 +581,37 @@ Vue.createApp({
       }
     },
     editDay: async function (dayID) {},
+
+    // personal database stuff
+    getPersonalDay: async function (dayID) {
+      let response = await fetch(`${URL}/days/${dayID}`);
+      let data = await response.json();
+      this.personalDay.push(data);
+      console.log(this.personalDay);
+    },
+
+    stealWeek: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      this.currentWeek[0].days = this.personalDay;
+
+      let requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(this.currentWeek[0]),
+      };
+
+      let res = await fetch(
+        `${URL}/personal/${this.currentUser._id}`,
+        requestOptions
+      );
+      if (res.status === 201) {
+        console.log("Week added to personal");
+      } else {
+        console.log("Something went wrong");
+      }
+    },
   },
   computed: {
     filteredDays: function () {

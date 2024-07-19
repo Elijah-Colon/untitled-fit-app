@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-      <!-- Vuetify CSS -->
-      <link
+    <!-- Vuetify CSS -->
+    <link
       href="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.css"
       rel="stylesheet"
     />
@@ -29,23 +29,20 @@
         <v-btn v-if="currentUser.userID" @click="deleteSession()">
           Logout
         </v-btn>
-        <v-btn
-          v-else
-          @click="setPage('login')"
-          v-if="currentPage !== 'login' "
-          >
+        <v-btn v-else @click="setPage('login')" v-if="currentPage !== 'login' ">
           Login
         </v-btn>
       </nav>
       <div v-if="currentPage === 'Browse'">
         <div class="search">
-          <v-text-field 
-          type="search" 
-          label="Search" 
-          v-model="searchInput"></v-text-field>
+          <v-text-field
+            type="search"
+            label="Search"
+            v-model="searchInput"
+          ></v-text-field>
           <div>
-            <v-btn  @click="sortWorkouts('day')">Days</v-btn>
-            <v-btn  @click="sortWorkouts('week')">Weeks</v-btn>
+            <v-btn @click="sortWorkouts('day')">Days</v-btn>
+            <v-btn @click="sortWorkouts('week')">Weeks</v-btn>
           </div>
         </div>
 
@@ -54,7 +51,9 @@
           v-if="sort === 'day'"
           v-for="(workout, index) in filteredDays"
           @click="openDay(workout._id) , setPage('singleDay')"
+          @click="getPersonalDay(workout._id)"
         >
+          >
           <div>{{workout.name}}</div>
         </div>
         <div
@@ -71,18 +70,20 @@
           <div class="input-container">
             <p class="label">Email</p>
             <br />
-            <v-text-field 
-            v-model="user.email" 
-            type="email" 
-            label="Email"></v-text-field>
+            <v-text-field
+              v-model="user.email"
+              type="email"
+              label="Email"
+            ></v-text-field>
           </div>
           <div class="input-container">
             <p class="label">Password</p>
             <br />
-            <v-text-field 
+            <v-text-field
               v-model="user.password"
-              type="password" 
-              label="password"></v-text-field>
+              type="password"
+              label="password"
+            ></v-text-field>
           </div>
           <v-btn type="submit" class="loginButton">Log in</v-btn>
           <p>
@@ -100,19 +101,21 @@
           </div>
           <div class="input-container">
             <p class="label">Email</p>
-            <v-text-field 
-            v-model="user.email" 
-            type="email" 
-            label="Email"></v-text-field>
+            <v-text-field
+              v-model="user.email"
+              type="email"
+              label="Email"
+            ></v-text-field>
           </div>
           <div class="input-container">
             <p class="label">Password</p>
-            <v-text-field 
-            v-model="user.password" 
-            type="password" 
-            label="password"></v-text-field>
+            <v-text-field
+              v-model="user.password"
+              type="password"
+              label="password"
+            ></v-text-field>
           </div>
-          <v-btn type="submit" >Register</v-btn>
+          <v-btn type="submit">Register</v-btn>
           <p>
             Already have an account?
             <span @click="setPage('login')">Log in</span>
@@ -134,27 +137,26 @@
       <div v-if="currentPage ==='aboutUs'"></div>
       <div v-if="currentPage === 'Cday'">
         <p>Title</p>
-        <v-text-field 
-          label="Title" 
-          v-model="newDay.name"></v-text-field>
+        <v-text-field label="Title" v-model="newDay.name"></v-text-field>
         <p>Workouts</p>
         <div v-for="(workout, index) in newWorkout">
-          <v-text-field 
-          label="Search" 
-          v-model="workout.searchInput"></v-text-field>
+          <v-text-field
+            label="Search"
+            v-model="workout.searchInput"
+          ></v-text-field>
 
           <v-select
-          v-model="workout.work"
-          :items="filteredWorkouts(workout)"
-          item-title="name"
-          filled
-          return-object
+            v-model="workout.work"
+            :items="filteredWorkouts(workout)"
+            item-title="name"
+            filled
+            return-object
           >
           </v-select>
-          <v-btn  @click="removeWorkout(index)">remove</v-btn>
+          <v-btn @click="removeWorkout(index)">remove</v-btn>
         </div>
-        <v-btn  @click="addworkout()">add workout</v-btn>
-        <v-btn  @click="createDay()">Create</v-btn>
+        <v-btn @click="addworkout()">add workout</v-btn>
+        <v-btn @click="createDay()">Create</v-btn>
         <v-btn @click="LastPage()">Back</v-btn>
       </div>
 
@@ -164,19 +166,14 @@
         <h3>Create week</h3>
         <p>title</p>
         <!-- <input type="text" placeholder="title" v-model="newWeek.name" /> -->
-        <v-text-field 
-        label="Title"
-        v-model="newWeek.name"> 
-          </v-text-field>
+        <v-text-field label="Title" v-model="newWeek.name"> </v-text-field>
         <p>Description</p>
         <!-- <input
           type="text"
           placeholder="Description"
           v-model="newWeek.description"
         /> -->
-        <v-text-field 
-          label="Description"
-          v-model="newWeek.description">
+        <v-text-field label="Description" v-model="newWeek.description">
         </v-text-field>
         <!-- WHERE YOU CREATE A NEW DAY IN WEEKS -->
         <div v-for="(day,Dayindex) in newWeekDay">
@@ -184,14 +181,11 @@
           <div v-if="day.show">
             <p>Day Name</p>
             <!-- <input type="text" v-model="day.name" placeholder="Title..." /> -->
-            <v-text-field 
-            v-model="day.name"
-            label="Title">
-            </v-text-field>
+            <v-text-field v-model="day.name" label="Title"> </v-text-field>
 
             <!-- WHERE YOU CREATE A WORKOUT WITHIN THAT DAY  -->
-            <v-btn  @click="makeWorkout(Dayindex)">add workout</v-btn>
-            <v-btn  @click="removeDayWeek(Dayindex)">Delete</v-btn>
+            <v-btn @click="makeWorkout(Dayindex)">add workout</v-btn>
+            <v-btn @click="removeDayWeek(Dayindex)">Delete</v-btn>
             <div v-for="(workouts, index) in day.workout">
               <input type="text" v-model="workouts.searchInput" />
               <select v-model="workouts.work">
@@ -203,12 +197,12 @@
                 </option>
               </select>
               <!-- add a delete for this -->
-              <v-btn  @click="removeWorkoutWeek(day,index)">Delete</v-btn>
+              <v-btn @click="removeWorkoutWeek(day,index)">Delete</v-btn>
             </div>
           </div>
           <div v-else>
             {{day.name}}
-            <v-btn  @click="removeDayWeek(Dayindex)">Remove</v-btn>
+            <v-btn @click="removeDayWeek(Dayindex)">Remove</v-btn>
           </div>
         </div>
         <div class="modal" v-show="!modalOpen">
@@ -222,17 +216,21 @@
                 {{day.name}}
               </option>
             </select>
-            <v-btn  v-on:click="updateNewWeekday()">Save</v-btn>
+            <v-btn v-on:click="updateNewWeekday()">Save</v-btn>
           </div>
         </div>
-        <v-btn  @click="addDay()">Create Day</v-btn>
-        <v-btn  @click="toggleModal()">Add Day</v-btn>
-        <v-btn  @click="createWeek()">Create Week</v-btn>
+        <v-btn @click="addDay()">Create Day</v-btn>
+        <v-btn @click="toggleModal()">Add Day</v-btn>
+        <v-btn @click="createWeek()">Create Week</v-btn>
       </div>
 
       <div v-if="currentPage === 'singleWeek'">
         <v-btn @click="LastPage()">Back</v-btn>
+        <!-- <v-btn @click="getPersonalDay(currentDay._id)"> Steal </v-btn> -->
         <div class="day-in-week" v-for="day in currentWeek">
+          <div>
+            <v-btn @click="stealWeek()">Steal</v-btn>
+          </div>
           <h2>{{currentWeek.name}}</h2>
 
           <div class="day-miau">
@@ -240,6 +238,9 @@
             {{day.description}} {{day.dow}}
           </div>
           <div v-for="days in day.days">
+            <div>
+              <v-btn @click="getPersonalDay(days._id)">steal</v-btn>
+            </div>
             {{days.name}}
             <div v-for="workouts in days.workouts">
               {{workouts.name}}
@@ -254,6 +255,7 @@
         <v-btn @click="LastPage()">Back</v-btn>
         <div class="workout-in-day" v-for="workout in currentDay.workouts">
           {{currentDay.name}} {{workout.name}} {{workout.primaryMuscles}}
+          <v-btn @click="getPersonalDay(dayID)">miau</v-btn>
         </div>
       </div>
 
@@ -336,9 +338,9 @@
       </div>
       <div v-if="currentPage === 'editWeek'"></div>
     </div>
-        <!-- Vue and Vuetify JavaScript -->
-        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.js"></script>
-        <script src="app.js"></script>
+    <!-- Vue and Vuetify JavaScript -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>
