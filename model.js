@@ -82,7 +82,7 @@ const WeekSchema = Schema(
   {
     name: {
       type: String,
-      required: [true, "Week needs a name"],
+      // required: [true, "Week needs a name"],
     },
     dow: {
       type: String,
@@ -90,7 +90,7 @@ const WeekSchema = Schema(
     },
     description: {
       type: String,
-      required: [true, "Week needs a description"],
+      // required: [true, "Week needs a description"],
     },
     days: [
       {

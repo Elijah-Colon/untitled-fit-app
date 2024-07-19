@@ -3,7 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-body{
+body {
   background-color: rgba(88, 88, 88, 0.996);
 }
 
@@ -15,19 +15,19 @@ nav {
   justify-content: space-around;
   background-color: rgb(106, 83, 139);
 }
-.createPage{
+.createPage {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.login{
+.login {
   display: flex;
   justify-content: space-around;
   align-items: center;
   height: 50vh;
 }
-.register{
+.register {
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -50,10 +50,23 @@ nav {
   align-items: center;
   gap: 1rem;
 }
-.navButton:hover{
+.navButton:hover {
   color: gray;
   cursor: pointer;
 }
-.navButton{
+.navButton {
   font-size: 2.5vh;
+}
+
+.shrink {
+  gap: 5px;
+  height: 30px;
+  width: 70px;
+}
+
+.workouts {
+  display: grid;
+  grid-template-columns: 4fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 12px 24px;
 }
