@@ -140,7 +140,7 @@ const PersonalSchema = Schema({
       owner: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: [true, "A day needs an owner"],
+        required: [false, "A day needs an owner"],
       },
       reviews: {
         type: String,
@@ -196,6 +196,7 @@ const Workout = mongoose.model("Workout", WorkoutSchema);
 const Day = mongoose.model("Day", DaySchema);
 const Week = mongoose.model("Week", WeekSchema);
 const Time = mongoose.model("Time", IncrSchema);
+const Personal = mongoose.model("Personal", PersonalSchema);
 
 module.exports = {
   User,
@@ -203,4 +204,5 @@ module.exports = {
   Day,
   Week,
   Time,
+  Personal,
 };

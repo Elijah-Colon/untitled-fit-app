@@ -59,6 +59,7 @@
           v-if="sort === 'day'"
           v-for="(workout, index) in filteredDays"
           @click="openDay(workout._id) , setPage('singleDay')"
+          @click="getPersonalDay(workout._id)"
         >
           <div>{{workout.name}}</div>
         </div>
@@ -282,7 +283,7 @@
         <v-btn @click="addDay()">Create Day</v-btn>
         <v-btn @click="toggleModal()">Add Day</v-btn>
         <v-btn @click="createWeek()">Create Week</v-btn>
-        <!-- modal -->
+        
         <div class="modal" v-show="!modalOpen">
           <div class="content">
             <div id="close" @click="toggleModal()">X</div>
@@ -305,12 +306,21 @@
 
       <div v-if="currentPage === 'singleWeek'">
         <v-btn @click="LastPage()">Back</v-btn>
+        <!-- <v-btn @click="getPersonalDay(currentDay._id)"> Steal </v-btn> -->
         <div class="day-in-week" v-for="day in currentWeek">
+          <div>
+            <v-btn @click="stealWeek()">Steal</v-btn>
+          </div>
+          <h2>{{currentWeek.name}}</h2>
+  
           <div class="day-miau">
             <h3>{{day.name}}</h3>
             {{day.description}} {{day.dow}}
           </div>
           <div v-for="days in day.days">
+            <div>
+              <v-btn @click="getPersonalDay(days._id)">steal</v-btn>
+            </div>
             {{days.name}}
             <div v-for="workouts in days.workouts">
               {{workouts.name}}
@@ -325,6 +335,7 @@
         <v-btn @click="LastPage()">Back</v-btn>
         <div class="workout-in-day" v-for="workout in currentDay.workouts">
           {{currentDay.name}} {{workout.name}} {{workout.primaryMuscles}}
+          <v-btn @click="getPersonalDay(dayID)">miau</v-btn>
         </div>
       </div>
 

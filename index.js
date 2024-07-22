@@ -477,6 +477,103 @@ app.get("/time/:userID", async function (req, res) {
   }
 });
 
+// Personal GET,POST,PUT(and splice), and DELETE
+
+app.get("/personal/:userID", AuthMiddleware, async function (req, res) {
+  try {
+    let week = await model.Personal.find({ owner: req.params.userID })
+      .populate("owner", "-password")
+      .populate({ path: "days", populate: { path: "workouts" } });
+    // console.log(week);
+    if (!week) {
+      res.status(404).send("Weeks not found");
+      return;
+    }
+    res.json(week);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send("Wees not found");
+  }
+});
+
+app.post("/personal/:userID", AuthMiddleware, async function (req, res) {
+  try {
+    console.log(req.body);
+
+    const newWeek = new model.Personal({
+      name: req.body.name,
+      dow: req.body.dow,
+      description: req.body.description,
+      days: req.body.days,
+      owner: req.session.userID,
+      reviews: req.body.reviews,
+    });
+
+    const error = await newWeek.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+
+    await newWeek.save();
+    res.status(201).send("Created personal Quiz :3");
+  } catch (error) {
+    console.error(error);
+    res.status(422).send(error);
+  }
+});
+
+app.put("/personal/:weekID", AuthMiddleware, async function (req, res) {
+  try {
+    let week = await model.Personal.findOne({
+      _id: req.params.weekID,
+      owner: req.session.userID,
+    }).populate("owner");
+
+    if (!week) {
+      res.status(404).send("Could not find week.");
+      return;
+    }
+
+    week.name = req.body.name;
+    week.dow = req.body.dow;
+    week.description = req.body.dow;
+    week.days = req.body.days;
+    week.reviews = req.body.reviews;
+
+    const error = await week.validateSync();
+    if (error) {
+      res.status(422).send(error);
+      console.log(error);
+      return;
+    }
+    await week.save();
+    res.status(201).send("week updated :3");
+  } catch (error) {
+    console.log(error);
+    res.status(422).send(error);
+  }
+});
+
+app.delete("/personal/:weekID", AuthMiddleware, async function (req, res) {
+  try {
+    let isDeleted = await model.Personal.findOneAndDelete({
+      _id: req.params.weekID,
+      owner: req.session.userID,
+    });
+    if (!isDeleted) {
+      res.status(404).send("Week not found");
+      return;
+    }
+
+    res.status(204).send("Removed week ;3");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+});
+
 app.listen(8080, function () {
   console.log("server is running on http://localhost:8080...");
 });
