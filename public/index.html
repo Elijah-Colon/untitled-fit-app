@@ -9,8 +9,14 @@
       href="https://cdn.jsdelivr.net/npm/vuetify@3.0.5/dist/vuetify.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.6.13/vuetify-labs.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.6.13/vuetify-labs.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.4.47/css/materialdesignicons.min.css"
+    />
     <title>Document</title>
   </head>
   <body>
@@ -139,61 +145,81 @@
         <p>Title</p>
         <v-text-field label="Title" v-model="newDay.name"></v-text-field>
         <p>Workouts</p>
-        <div  v-for="(workout, index) in newWorkout">
+        <div v-for="(workout, index) in newWorkout">
           <v-text-field
             label="Search"
             v-model="workout.searchInput"
           ></v-text-field>
-<div class="workouts">
-          <v-select
-            v-model="workout.work"
-            :items="filteredWorkouts(workout)"
-            item-title="name"
-            item-value="_id"
-            filled
-            return
-          >
+          <div class="workouts">
+            <v-select
+              v-model="workout.work"
+              :items="filteredWorkouts(workout)"
+              item-title="name"
+              item-value="_id"
+              filled
+              return
+            >
+            </v-select>
 
+            <div class="selectButtons">
+              <v-btn
+                @click="setRSW('RSW',index)"
+                v-if="rswSET[index].input === 'RSW'"
+                >Time</v-btn
+              >
+              <v-btn
+                @click="setRSW('time',index)"
+                v-if="rswSET[index].input === 'time'"
+                >Reps/Sets</v-btn
+              >
+            </div>
 
-          </v-select>
-            <div v-for="(rsw, index) in rswSetups">            reps
+            <div v-if="rswSET[index].input === 'time'">
+              Time
               <v-number-input
-              v-model="rsw.rsw.reps"
-              :reverse="false"
-              control-variant="stack"
-              label=""
-              :hideInput="false"
-              :inset="false"
-            ></v-number-input>  </div>
-      <div v-for="(rsw, index) in rswSetups">          
-          sets
-          <v-number-input
-          v-model="rsw.rsw.sets"
-          :reverse="false"
-          control-variant="stack"
-          label=""
-          :hideInput="false"
-          :inset="false"
-        ></v-number-input> 
-        </div>
-      <div v-for="(rsw, index) in rswSetups">   
-        weight
-        <v-number-input
-        v-model="rsw.rsw.weight"
-        :reverse="false"
-        control-variant="stack"
-        label=""
-        :hideInput="false"
-        :inset="false"
-      ></v-number-input> 
-    </div>
-   
-   
-        </div>
-          <v-btn v-if="checkers[index].checker"  @click="addRSW(index)">Add weight/sets/reps</v-btn>
+                v-model="rswSetups[index].rsw.weight"
+                :reverse="false"
+                control-variant="stack"
+                label=""
+                :hideInput="false"
+                :inset="false"
+              ></v-number-input>
+            </div>
+            <div v-if="rswSET[index].input === 'RSW'">
+              reps
+              <v-number-input
+                v-model="rswSetups[index].rsw.reps"
+                :reverse="false"
+                control-variant="stack"
+                label=""
+                :hideInput="false"
+                :inset="false"
+              ></v-number-input>
+              sets
+              <v-number-input
+                v-model="rswSetups[index].rsw.sets"
+                :reverse="false"
+                control-variant="stack"
+                label=""
+                :hideInput="false"
+                :inset="false"
+              ></v-number-input>
+              weight
+              <v-number-input
+                v-model="rswSetups[index].rsw.weight"
+                :reverse="false"
+                control-variant="stack"
+                label=""
+                :hideInput="false"
+                :inset="false"
+              ></v-number-input>
+            </div>
+            <v-btn @click="removeWorkout(index)">remove</v-btn>
+          </div>
+
           <v-btn @click="removeWorkout(index)">remove</v-btn>
         </div>
-        <v-btn @click="addworkout()">add workout</v-btn>
+        <v-btn @click="addworkout() , addRSW(index)">add workout</v-btn>
         <v-btn @click="createDay()">Create</v-btn>
         <v-btn @click="LastPage()">Back</v-btn>
       </div>
@@ -252,29 +278,34 @@
             <v-btn @click="removeDayWeek(Dayindex)">Remove</v-btn>
           </div>
         </div>
-        <div class="modal" v-show="!modalOpen">
-          <div class="content">
-            <div id="close" @click="toggleModal()">X</div>
-            <input type="text" v-model="searchInput" />
-            <!-- need to fix this to where it only shows the users ones and not all the ones in the database -->
 
-            <select v-model="modal.id">
-              <option v-for="day in ownedFilteredDays" v-bind:value="day._id">
-                {{day.name}}
-              </option>
-            </select>
-            <v-btn v-on:click="updateNewWeekday()">Save</v-btn>
-          </div>
-        </div>
         <v-btn @click="addDay()">Create Day</v-btn>
         <v-btn @click="toggleModal()">Add Day</v-btn>
         <v-btn @click="createWeek()">Create Week</v-btn>
+        <!-- modal -->
+        <div class="modal" v-show="!modalOpen">
+          <div class="content">
+            <div id="close" @click="toggleModal()">X</div>
+            <div>
+            <v-text-field type="text" v-model="searchInput">
+            </v-text-field>
+            <!-- need to fix this to where it only shows the users ones and not all the ones in the database -->
+            <v-select
+            v-model="modal.id"
+            :items="ownedFilteredDays"
+            item-title="name"
+            item-value="_id"
+            filled
+          >
+        </div>
+            <v-btn v-on:click="updateNewWeekday()">Save</v-btn>
+          </div>
+        </div>
       </div>
 
       <div v-if="currentPage === 'singleWeek'">
         <v-btn @click="LastPage()">Back</v-btn>
         <div class="day-in-week" v-for="day in currentWeek">
-
           <div class="day-miau">
             <h3>{{day.name}}</h3>
             {{day.description}} {{day.dow}}
@@ -330,7 +361,11 @@
       <div v-if="currentPage === 'editWeek'">
         <div>Editing</div>
         <v-btn v-if="warning === 0" @click="Warn()">Back</v-btn>
-        <v-btn v-else @click="setPage('personal'), clearEditDay(), cleareditWeek(), clearday()">Back</v-btn>
+        <v-btn
+          v-else
+          @click="setPage('personal'), clearEditDay(), cleareditWeek(), clearday()"
+          >Back</v-btn
+        >
         <div>
           Title
           <v-text-field type="text" v-model="currentWeek[0].name">
@@ -347,12 +382,9 @@
               >
                 Edit
               </v-btn>
-              <v-btn
-              v-if="day.id != ''"
-              @click="removeWEEKDAy(Dayindex)"
-            >
-              Remove
-            </v-btn>
+              <v-btn v-if="day.id != ''" @click="removeWEEKDAy(Dayindex)">
+                Remove
+              </v-btn>
             </p>
             <div v-else>
               <div>Day Name</div>
@@ -369,13 +401,13 @@
                 <v-text-field type="text" v-model="workout.searchInput">
                 </v-text-field>
                 <v-select
-                v-model="workout.work"
-                :items="filteredWorkouts(workout)"
-                item-title="name"
-                item-value="_id"
-                filled
-              >
-              </v-select>
+                  v-model="workout.work"
+                  :items="filteredWorkouts(workout)"
+                  item-title="name"
+                  item-value="_id"
+                  filled
+                >
+                </v-select>
                 <v-btn @click="removeWorkoutWeek(day,index)">remove</v-btn>
               </div>
             </div>
@@ -400,8 +432,7 @@
         </div>
       </div>
       <div v-if="currentPage === 'editDay'">
-        <v-btn v-if="warning === 0" @click="Warn()">Back
-        </v-btn>
+        <v-btn v-if="warning === 0" @click="Warn()">Back </v-btn>
         <v-btn v-else @click="LastPage(),   clearEditDay()">Back</v-btn>
         Title
         <v-text-field type="text" v-model="editingday.name"> </v-text-field>
@@ -423,11 +454,10 @@
           </v-select>
 
           <v-btn @click="removeDayWorkoutEdit(index)">Remove</v-btn>
-
+        </div>
+        <v-btn @click="addworkoutDayEdit(index)">Add workout</v-btn>
+        <v-btn @click="UpdateWeekDay(),setPage('editWeek')">Save</v-btn>
       </div>
-      <v-btn @click="addworkoutDayEdit(index)">Add workout</v-btn>
-      <v-btn @click="UpdateWeekDay(),setPage('editWeek')">Save</v-btn>
-
     </div>
     <!-- Vue and Vuetify JavaScript -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>

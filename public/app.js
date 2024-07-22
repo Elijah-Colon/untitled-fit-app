@@ -49,13 +49,23 @@ Vue.createApp({
         workout: [],
         id: "",
         show: false,
-        incrUser: {},
       },
+      incrUser: {},
       lastPage: "",
       editingday: [],
       editingdayWorkouts: [],
       warning: 0,
-      rswSetups: [],
+      rswSetups: [
+        {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        },
+      ],
       inputRWS: {
         workoutID: "",
         rsw: {
@@ -65,9 +75,10 @@ Vue.createApp({
         },
         amount: 1,
       },
-      checkers: [
+
+      rswSET: [
         {
-          checker: true,
+          input: "RSW",
         },
       ],
     };
@@ -75,8 +86,76 @@ Vue.createApp({
   methods: {
     addRSW: function (index) {
       this.rswSetups.push(this.inputRWS);
-      this.checkers[index].checker = false;
     },
+
+    setRSW: function (option, index) {
+      if (option === "RSW") {
+        this.rswSET[index].input = "time";
+        this.rswSetups[index].rsw.reps = 0;
+        this.rswSetups[index].rsw.sets = 0;
+        this.rswSetups[index].rsw.weight = 0;
+      } else {
+        this.rswSET[index].input = "RSW";
+        this.rswSetups[index].rsw.weight = 0;
+      }
+    },
+
+    makeRSW: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      for (let element of this.rswSetups) {
+        console.log(element);
+        let TEMP = {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+        };
+        TEMP.workoutID = element.workoutID;
+        TEMP.rsw.reps = element.rsw.reps;
+        TEMP.rsw.sets = element.rsw.sets;
+        TEMP.rsw.weight = element.rsw.weight;
+        console.log(TEMP);
+
+        let requestOptions = {
+          method: "PUT",
+          headers: myHeaders,
+          body: JSON.stringify(TEMP),
+        };
+        let userID = this.currentUser.userID;
+        let response = await fetch(`${URL}/users/${userID}`, requestOptions);
+        if (response.status === 201) {
+          this.clearRSW();
+          console.log("Succesfully created workout reps/sets/time");
+        }
+      }
+      let userID = this.currentUser.userID;
+      let response = await fetch(`${URL}/users/${userID}`);
+      let data = await response.json();
+      console.log(data.rsw);
+    },
+    clearRSW: function () {
+      this.rswSET = [
+        {
+          input: "RSW",
+        },
+      ];
+      this.rswSetups = [
+        {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        },
+      ];
+    },
+
     // Workouts
     getWorkouts: async function () {
       let response = await fetch(`${URL}/workouts`);
@@ -160,12 +239,17 @@ Vue.createApp({
         searchInput: "",
         filterWorkout: [],
       });
-      this.checkers.push({
-        checker: true,
+
+      this.rswSET.push({
+        input: "RSW",
       });
     },
     removeWorkout: function (index) {
       this.newWorkout.splice(index, 1);
+      this.rswSET.splice(index, 1);
+      this.rswSetups.splice(index, 1);
+      console.log(this.rswSetups);
+      console.log(this.rswSET);
     },
     removeWorkoutWeek: function (day, index) {
       console.log(day);
@@ -178,9 +262,12 @@ Vue.createApp({
     },
     createDay: async function () {
       let myHeaders = new Headers();
+      let index = 0;
       myHeaders.append("Content-Type", "application/json");
       this.newWorkout.forEach((element) => {
         this.newDay.workouts.push(element.work);
+        this.rswSetups[index].workoutID = element.work;
+        index++;
       });
       let requestOptions = {
         method: "POST",
@@ -193,11 +280,13 @@ Vue.createApp({
         this.getDays();
         this.clearday();
         this.currentPage = "Browse";
+        await this.makeRSW();
         console.log("Succesfully created");
       } else {
         console.log("Failed");
       }
     },
+
     createWeekdays: async function () {
       let days = [];
       let myHeaders = new Headers();
