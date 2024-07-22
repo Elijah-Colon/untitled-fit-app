@@ -49,8 +49,8 @@ Vue.createApp({
         workout: [],
         id: "",
         show: false,
-        incrUser: {},
       },
+      incrUser: {},
       lastPage: "",
       personalDay: [],
       editingday: [],
@@ -71,6 +71,8 @@ Vue.createApp({
           checker: true,
         },
       ],
+      personalWeeks: [],
+      incrWorkID: "",
     };
   },
   methods: {
@@ -328,6 +330,7 @@ Vue.createApp({
         this.currentPage = "Browse";
         console.log(this.currentUser);
         this.runTimestamp();
+        this.getPersonalWeek(this.currentUser.userID);
       } else {
         console.log("Failed to log in");
       }
@@ -392,6 +395,7 @@ Vue.createApp({
       this.currentPage = "singleWeek";
       console.log("DATA", data);
       console.log(this.currentWeek);
+      console.log("currentPage", this.currentPage);
     },
 
     openDay: async function (dayID) {
@@ -492,7 +496,34 @@ Vue.createApp({
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 
-      let rsw = {};
+      console.log(this.incrWorkID);
+
+      let rsw = {
+        workoutID: this.incrWorkID,
+        rsw: {
+          reps: this.incrUser.rsw[this.incrWorkID].reps,
+          sets: this.incrUser.rsw[this.incrWorkID].sets,
+          weight: this.incrUser.rsw[this.incrWorkID].weight,
+        },
+      };
+      console.log(rsw);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(rsw),
+      };
+
+      let res = await fetch(
+        `${URL}/users/${this.currentUser.userID}`,
+        requestOptions
+      );
+
+      if (res.status === 201) {
+        console.log("RSW updated");
+      } else {
+        console.log("Could not update RSW");
+      }
     },
 
     runTimestamp: async function () {
@@ -505,7 +536,9 @@ Vue.createApp({
         console.log("change");
         await this.getIncrUser();
         for (let workoutID of Object.keys(this.incrUser.rsw)) {
+          this.incrWorkID = workoutID;
           this.incrUser.rsw[workoutID].weight += 5;
+          this.updateUser();
           console.log(this.incrUser.rsw[workoutID].weight);
         }
       } else {
@@ -622,7 +655,7 @@ Vue.createApp({
       let response = await fetch(`${URL}/days/${dayID}`);
       let data = await response.json();
       this.personalDay.push(data);
-      console.log(this.personalDay);
+      console.log("personal week", this.personalDay);
     },
 
     stealWeek: async function () {
@@ -643,9 +676,17 @@ Vue.createApp({
       );
       if (res.status === 201) {
         console.log("Week added to personal");
+        this.getPersonalWeek(this.currentUser.userID);
       } else {
         console.log("Something went wrong");
       }
+    },
+
+    getPersonalWeek: async function (weekID) {
+      let res = await fetch(`${URL}/personal/${weekID}`);
+      let data = await res.json();
+      console.log(res);
+      this.personalWeeks = data;
     },
 
     addworkoutDayEdit: function (index) {
@@ -817,6 +858,7 @@ Vue.createApp({
 
   created: function () {
     console.log("app loaded");
+
     this.getWorkouts();
     this.getDays();
     this.getWeeks();
