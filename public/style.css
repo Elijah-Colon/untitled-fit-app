@@ -17,9 +17,16 @@ nav {
 }
 .createPage {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 50px;
+}
+.box {
+  display: flex;
+  flex-direction: row;
+  justify-content: baseline;
+  height: 5rem;
 }
 .login {
   display: flex;
