@@ -29,7 +29,7 @@ async function AuthMiddleware(request, response, next) {
     }
     // if they are autheticated just pass them to the endpoint
     request.user = user;
-    console.log("REQUEST", request.user);
+    // console.log("REQUEST", request.user);/
     next();
   } else {
     return response.status(401).send("unauthenticated");
@@ -390,13 +390,13 @@ app.delete("/weeks/:weekID", AuthMiddleware, async function (req, res) {
 
 app.get("/weeks/:weekID", async function (req, res) {
   try {
-    console.log(req.params.weekID);
+    // console.log(req.params.weekID);
     let week = await model.Week.find({ _id: req.params.weekID })
       .populate("owner", "-password")
       .populate("days")
       .populate({ path: "days", populate: { path: "workouts" } });
 
-    console.log(week);
+    // console.log(week);
     if (!week) {
       console.log("week not found");
       res.status(404).send("week not found");
@@ -446,7 +446,6 @@ app.put("/time", AuthMiddleware, async function (req, res) {
     }
 
     timestamp.weekInt = req.body.weekInt;
-
     const error = await timestamp.validateSync();
     if (error) {
       res.status(422).send(error);
@@ -538,7 +537,7 @@ app.put("/personal/:weekID", AuthMiddleware, async function (req, res) {
 
     week.name = req.body.name;
     week.dow = req.body.dow;
-    week.description = req.body.dow;
+    week.description = req.body.description;
     week.days = req.body.days;
     week.reviews = req.body.reviews;
 

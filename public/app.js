@@ -73,6 +73,29 @@ Vue.createApp({
       ],
       personalWeeks: [],
       incrWorkID: "",
+      newPersonalWeek: {
+        name: "",
+        description: "",
+        days: [],
+      },
+      newPersonalDay: [
+        {
+          name: "",
+          workouts: [],
+        },
+      ],
+      personalModalOpen: true,
+      personalModal: {
+        name: "",
+        workout: [],
+        id: "",
+        show: false,
+      },
+      editingPersonalDay: [],
+      editingPersonalDayWorkouts: [],
+      personalDayIndex: -1,
+      personalDayArray: [],
+      modalDay: {},
     };
   },
   methods: {
@@ -226,7 +249,9 @@ Vue.createApp({
             body: JSON.stringify(this.newDay),
           };
           let response = await fetch(`${URL}/days`, requestOptions);
+
           let data = await response.json();
+          console.log("data", data);
           console.log("ID", data._id);
 
           days.push(data._id.toString());
@@ -372,6 +397,7 @@ Vue.createApp({
       }
       this.getDays();
       this.getWeeks();
+      this.getPersonalWeek(this.currentUser.userID);
     },
     deleteSession: async function () {
       let requestOptions = {
@@ -682,11 +708,128 @@ Vue.createApp({
       }
     },
 
-    getPersonalWeek: async function (weekID) {
-      let res = await fetch(`${URL}/personal/${weekID}`);
+    getPersonalWeek: async function (userID) {
+      let res = await fetch(`${URL}/personal/${userID}`);
       let data = await res.json();
       console.log(res);
       this.personalWeeks = data;
+
+      for (let element of this.personalWeeks) {
+        for (let newEl of element.days) {
+          this.personalDayArray.push(newEl);
+        }
+      }
+    },
+
+    splicePersonalDay: async function (week, weekID, index) {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      console.log(week);
+      week.days.splice(index, 1);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(week),
+      };
+
+      let res = await fetch(`${URL}/personal/${weekID}`, requestOptions);
+
+      if (res.status === 201) {
+        console.log("day removed");
+      } else {
+        console.log("failed to remove day");
+      }
+    },
+
+    deletePersonalWeek: async function (weekID) {
+      requestOptions = {
+        method: "DELETE",
+      };
+
+      let res = await fetch(`${URL}/personal/${weekID}`, requestOptions);
+      if (res.status === 204) {
+        console.log("Week has been removed");
+        this.getPersonalWeek(this.currentUser.userID);
+      } else {
+        console.log("Failed to remove week");
+      }
+    },
+
+    editPersonalWeek: async function (week) {
+      this.newPersonalWeek = week;
+      this.newPersonalDay = week.days;
+      console.log("Week", this.newPersonalWeek);
+      console.log("Day", this.newPersonalDay);
+      this.currentPage = "editPersonalWeek";
+    },
+
+    updatePersonalWeek: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      this.newPersonalWeek.days = this.newPersonalDay;
+
+      console.log(this.personalDayArray);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(this.newPersonalWeek),
+      };
+
+      let res = await fetch(
+        `${URL}/personal/${this.newPersonalWeek._id}`,
+        requestOptions
+      );
+
+      if ((res.status = 201)) {
+        console.log("Week updated");
+        this.getPersonalWeek(this.currentUser.userID);
+      } else {
+        console.log("Failed to update week");
+      }
+    },
+    togglePersonalModal: function () {
+      this.personalModalOpen = !this.personalModalOpen;
+    },
+
+    editPersonalDay: async function (weekID, index) {
+      this.personalDayIndex = index;
+      this.currentPage = "editPersonalDay";
+      this.editingPersonalDay = this.newPersonalDay[index];
+      for (let element of this.editingPersonalDay.workouts) {
+        this.editingPersonalDayWorkouts.push({
+          searchInput: "",
+          work: element._id,
+        });
+      }
+    },
+
+    updatePersonalWorkDay: function (index) {
+      this.editingPersonalDayWorkouts.push({
+        searchInput: "",
+        work: "",
+      });
+    },
+
+    clearPersonalWeek: function () {
+      this.editingPersonalDay = [];
+      this.editingPersonalDayWorkouts = [];
+      this.newPersonalDay = [];
+    },
+
+    savePersonalDay: async function (index) {
+      this.newPersonalDay[this.personalDayIndex].workouts = [];
+      for (let element of this.editingPersonalDayWorkouts) {
+        this.newPersonalDay[this.personalDayIndex].workouts.push(element.work);
+      }
+    },
+
+    splicePersonalWorkout: function (index) {
+      this.editingPersonalDayWorkouts.splice(index, 1);
+      console.log(this.editingPersonalDayWorkouts);
     },
 
     addworkoutDayEdit: function (index) {
@@ -694,6 +837,30 @@ Vue.createApp({
         searchInput: "",
         work: "",
       });
+    },
+
+    pushPersonalDay: function () {
+      console.log(this.modalDay);
+      this.newPersonalDay.push(this.modalDay);
+      console.log(this.editingPersonalDay);
+    },
+
+    addPersonalDay: function () {
+      this.newPersonalDay = {
+        name: "",
+        workout: [],
+      };
+    },
+
+    makePersonalWorkout: async function (index) {
+      console.log(this.newPersonalDay);
+      console.log(index);
+      this.newPersonalDay[index].workout.push({
+        work: "",
+        searchInput: "",
+        filterWorkout: [],
+      });
+      console.log(this.newPersonalDay[index]);
     },
 
     removeDayWorkoutEdit: function (index) {
@@ -723,13 +890,6 @@ Vue.createApp({
     UpdateWeekDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      console.log("1", this.editingday);
-      this.editingday.workouts = [];
-      for (let element of this.editingdayWorkouts) {
-        console.log(element.work);
-        this.editingday.workouts.push(element.work);
-      }
-      console.log("2", this.editingday);
 
       let requestOptions = {
         method: "PUT",
