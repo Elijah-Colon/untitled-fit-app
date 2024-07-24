@@ -42,10 +42,6 @@ const WorkoutSchema = Schema({
     required: true,
   },
   muscle: [{ type: String, required: true }],
-  instructions: {
-    type: String,
-    required: false,
-  },
   reps: {
     type: Number,
     required: false,

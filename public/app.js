@@ -11,6 +11,7 @@ Vue.createApp({
       workouts: [],
       days: [],
       weeks: [],
+      randomNum: 0,
       currentPage: "Browse",
       user: {
         name: "",
@@ -56,7 +57,17 @@ Vue.createApp({
       editingday: [],
       editingdayWorkouts: [],
       warning: 0,
-      rswSetups: [],
+      rswSetups: [
+        {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        },
+      ],
       inputRWS: {
         workoutID: "",
         rsw: {
@@ -66,9 +77,10 @@ Vue.createApp({
         },
         amount: 1,
       },
-      checkers: [
+
+      rswSET: [
         {
-          checker: true,
+          input: "RSW",
         },
       ],
       personalWeeks: [],
@@ -96,20 +108,192 @@ Vue.createApp({
       personalDayIndex: -1,
       personalDayArray: [],
       modalDay: {},
+      flag: 0,
+      whichEdit: 0,
+      tempRSW: [
+        {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        },
+      ],
+      tempSET: [
+        {
+          input: "RSW",
+        },
+      ],
+      temp: 0,
+      flag: 0,
+      bol: true,
+      instructionsRandomDay: "",
     };
   },
   methods: {
     addRSW: function (index) {
-      this.rswSetups.push(this.inputRWS);
-      this.checkers[index].checker = false;
+      this.rswSetups.push({
+        workoutID: "",
+        rsw: {
+          reps: 0,
+          sets: 0,
+          weight: 0,
+        },
+        amount: 1,
+      });
     },
+    // addRSWweek: function () {
+    //   if (this.flag > 0) {
+    //     this.rswSetups.push({
+    //       workoutID: "",
+    //       rsw: {
+    //         reps: 0,
+    //         sets: 0,
+    //         weight: 0,
+    //       },
+    //       amount: 1,
+    //     });
+    //     console.log(this.rswSetups);
+    //   } else {
+    //     this.flag++;
+    //     console.log(this.rswSetups);
+    //   }
+    // },
+    clearTEMP: function () {
+      this.tempSET = [
+        {
+          input: "RSW",
+        },
+      ];
+      this.tempRSW = {
+        workoutID: "",
+        rsw: {
+          reps: 0,
+          sets: 0,
+          weight: 0,
+        },
+        amount: 1,
+      };
+    },
+    setRSW: function (option, index) {
+      if (option === "RSW") {
+        this.rswSET[index].input = "time";
+        this.rswSetups[index].rsw.reps = 0;
+        this.rswSetups[index].rsw.sets = 0;
+        this.rswSetups[index].rsw.weight = 0;
+      } else {
+        this.rswSET[index].input = "RSW";
+        this.rswSetups[index].rsw.weight = 0;
+      }
+    },
+    setWeek: function (option, dayindex, index) {
+      if (option === "RSW") {
+        this.newWeekDay[dayindex].set[index].input = "time";
+        this.newWeekDay[dayindex].rsw[index].rsw.reps = 0;
+        this.newWeekDay[dayindex].rsw[index].rsw.sets = 0;
+
+        this.newWeekDay[dayindex].rsw[index].rsw.weight = 0;
+      } else {
+        this.newWeekDay[dayindex].set[index].input = "RSW";
+        this.newWeekDay[dayindex].rsw[index].rsw.weight = 0;
+      }
+    },
+    setTEMP: function (option, dayindex, index) {
+      if (option === "RSW") {
+        this.newWeekDay[dayindex].set[index].input = "time";
+        this.newWeekDay[dayindex].rsw[index].rsw.reps = 0;
+        this.newWeekDay[dayindex].rsw[index].rsw.sets = 0;
+
+        this.newWeekDay[dayindex].rsw[index].rsw.weight = 0;
+      } else {
+        this.newWeekDay[dayindex].set[index].input = "RSW";
+        this.newWeekDay[dayindex].rsw[index].rsw.weight = 0;
+      }
+    },
+
+    makeRSW: async function () {
+      this.flag = 0;
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      for (let element of this.rswSetups) {
+        console.log(element);
+        let TEMP = {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+        };
+        TEMP.workoutID = element.workoutID;
+        TEMP.rsw.reps = element.rsw.reps;
+        TEMP.rsw.sets = element.rsw.sets;
+        TEMP.rsw.weight = element.rsw.weight;
+        console.log(TEMP);
+
+        let requestOptions = {
+          method: "PUT",
+          headers: myHeaders,
+          body: JSON.stringify(TEMP),
+        };
+        let userID = this.currentUser.userID;
+        let response = await fetch(`${URL}/users/${userID}`, requestOptions);
+        if (response.status === 201) {
+          this.clearRSW();
+          console.log("Succesfully created workout reps/sets/time");
+        }
+      }
+      let userID = this.currentUser.userID;
+      let response = await fetch(`${URL}/users/${userID}`);
+      let data = await response.json();
+      let Temp = {
+        rsw: data.rsw,
+      };
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(Temp),
+      };
+      console.log(data.rsw);
+
+      let sessionResponse = await fetch(`${URL}/session`, requestOptions);
+      let sessionData = await sessionResponse.json();
+      console.log("sessionData", sessionData);
+      this.clearTEMP();
+    },
+    clearRSW: function () {
+      this.rswSET = [
+        {
+          input: "RSW",
+        },
+      ];
+      this.rswSetups = [
+        {
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        },
+      ];
+      console.log("SET", this.rswSET);
+      console.log(this.rswSetups);
+    },
+
     // Workouts
     getWorkouts: async function () {
       let response = await fetch(`${URL}/workouts`);
 
       let data = await response.json();
       this.workouts = data;
-      console.log(data);
+      for (let string of this.workouts[this.randomNum].instructions) {
+        this.instructionsRandomDay += string;
+      }
     },
     // Days
     getDays: async function () {
@@ -133,6 +317,8 @@ Vue.createApp({
         workout: [],
         id: "",
         show: true,
+        set: [],
+        rsw: [],
       });
     },
     toggleModal: function () {
@@ -161,7 +347,9 @@ Vue.createApp({
         alert("Please enter a day");
       }
     },
-
+    changeTEMP: function () {
+      this.temp = 1;
+    },
     makeWorkout: function (index) {
       console.log(this.newWeekDay);
       console.log(index);
@@ -170,6 +358,34 @@ Vue.createApp({
         searchInput: "",
         filterWorkout: [],
       });
+      if (this.temp === 0) {
+        this.rswSET.push({
+          input: "RSW",
+        });
+      } else {
+        // if (this.newWeekDay[index].rsw.length === 1) {
+        // this.bol = false;
+        // this.newWeekDay[index].rsw.push("HELLO");
+
+        // }
+        // if (this.bol) {
+        this.newWeekDay[index].set.push({
+          input: "RSW",
+        });
+        this.newWeekDay[index].rsw.push({
+          workoutID: "",
+          rsw: {
+            reps: 0,
+            sets: 0,
+            weight: 0,
+          },
+          amount: 1,
+        });
+        // } else {
+        // this.bol = true;
+        // }
+      }
+      // this.temp = 0;
     },
     // Page switch
     setPage: function (page) {
@@ -186,16 +402,25 @@ Vue.createApp({
         searchInput: "",
         filterWorkout: [],
       });
-      this.checkers.push({
-        checker: true,
+
+      this.rswSET.push({
+        input: "RSW",
       });
     },
     removeWorkout: function (index) {
       this.newWorkout.splice(index, 1);
+      this.rswSET.splice(index, 1);
+      this.rswSetups.splice(index, 1);
+      console.log(this.rswSetups);
+      console.log(this.rswSET);
     },
     removeWorkoutWeek: function (day, index) {
       console.log(day);
       day.workout.splice(index, 1);
+      day.set.splice(index, 1);
+      day.rsw.splice(index, 1);
+      this.rswSET.splice(index, 1);
+      this.rswSetups.splice(index, 1);
       console.log(day.workout);
       console.log(this.newWeekDay);
     },
@@ -204,9 +429,12 @@ Vue.createApp({
     },
     createDay: async function () {
       let myHeaders = new Headers();
+      let index = 0;
       myHeaders.append("Content-Type", "application/json");
       this.newWorkout.forEach((element) => {
         this.newDay.workouts.push(element.work);
+        this.rswSetups[index].workoutID = element.work;
+        index++;
       });
       let requestOptions = {
         method: "POST",
@@ -219,16 +447,38 @@ Vue.createApp({
         this.getDays();
         this.clearday();
         this.currentPage = "Browse";
+        await this.makeRSW();
         console.log("Succesfully created");
       } else {
         console.log("Failed");
       }
     },
+
     createWeekdays: async function () {
       let days = [];
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
+      this.tempRSW = [];
+      console.log(this.newWeekDay);
+      for (let element of this.newWeekDay) {
+        console.log("Day", element);
+        if (element.id === "") {
+          for (let rsw of element.rsw) {
+            console.log("RSW", rsw);
+            this.tempRSW.push({
+              workoutID: "",
+              rsw: {
+                reps: rsw.rsw.reps,
+                sets: rsw.rsw.sets,
+                weight: rsw.rsw.weight,
+              },
+            });
+          }
+        }
+      }
+      this.rswSetups = this.tempRSW;
+      console.log("DONERSW", this.rswSetups);
+      let index = 0;
       for (let element of this.newWeekDay) {
         console.log(element.id);
         console.log(element);
@@ -238,6 +488,9 @@ Vue.createApp({
           // this.newDay.name.push(element.name);
           for (let id of element.workout) {
             this.newDay.workouts.push(id.work);
+            this.rswSetups[index].workoutID = id.work;
+            console.log("rswSetups", this.rswSetups);
+            index++;
           }
           //
           // end of second loop
@@ -290,6 +543,7 @@ Vue.createApp({
       let response = await fetch(`${URL}/weeks`, requestOptions);
       console.log(response);
       if (response.status === 201) {
+        this.makeRSW();
         this.getDays();
         this.getWeeks();
         this.clearday();
@@ -672,6 +926,7 @@ Vue.createApp({
         };
         newDay.id = element._id;
         newDay.name = element.name;
+
         this.newWeekDay.push(newDay);
       }
     },
@@ -837,6 +1092,9 @@ Vue.createApp({
         searchInput: "",
         work: "",
       });
+      this.rswSET.push({
+        input: "RSW",
+      });
     },
 
     pushPersonalDay: function () {
@@ -865,6 +1123,8 @@ Vue.createApp({
 
     removeDayWorkoutEdit: function (index) {
       this.editingdayWorkouts.splice(index, 1);
+      this.rswSetups.splice(index, 1);
+      this.rswSET.splice(index, 1);
       console.log(this.editingdayWorkouts);
     },
     editDay: async function (dayID) {
@@ -872,35 +1132,80 @@ Vue.createApp({
       let response = await fetch(`${URL}/days/${dayID}`);
       this.editingday = await response.json();
       console.log("day", this.editingday);
+      let index = 0;
       for (let element of this.editingday.workouts) {
         this.editingdayWorkouts.push({
           searchInput: "",
           work: element._id,
         });
+        if (index > 0) {
+          this.rswSET.push({
+            input: "RSW",
+          });
+          this.addRSW();
+        }
+        if (element._id in this.currentUser.rsw) {
+          this.rswSetups[index].rsw.reps =
+            this.currentUser.rsw[element._id].reps;
+          this.rswSetups[index].rsw.sets =
+            this.currentUser.rsw[element._id].sets;
+          this.rswSetups[index].rsw.weight =
+            this.currentUser.rsw[element._id].weight;
+        }
+        if (
+          this.rswSetups[index].rsw.reps === 0 &&
+          this.rswSetups[index].rsw.sets === 0
+        ) {
+          this.rswSET[index].input = "time";
+        }
+        index++;
       }
       console.log(this.editingdayWorkouts);
+    },
+    edit: function (num) {
+      this.whichEdit = num;
     },
     clearEditDay: function () {
       this.editingday = [];
       this.editingdayWorkouts = [];
       this.warning = 0;
-      console.log(this.editingday);
+      console.log("boi", this.editingday);
       console.log(this.editingdayWorkouts);
     },
     UpdateWeekDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
+      console.log("1", this.editingday);
+      console.log(this.editingdayWorkouts);
+      this.editingday.workouts = [];
+      let index = 0;
+      for (let element of this.editingdayWorkouts) {
+        this.rswSetups[index].workoutID = element.work;
+        this.editingday.workouts.push(element.work);
+        index++;
+      }
+      console.log("2", this.editingday);
+      console.log("hello");
       let requestOptions = {
         method: "PUT",
         headers: myHeaders,
         body: JSON.stringify(this.editingday),
       };
+      console.log("hello");
       let dayID = this.editingday._id;
+      console.log("ID", dayID);
       let response = await fetch(`${URL}/days/${dayID}`, requestOptions);
+      console.log(response);
       if (response.status === 204) {
         this.getDays();
         this.clearEditDay();
+        await this.makeRSW();
+        this.clearRSW();
+        if (this.whichEdit === 0) {
+          this.setPage("personal");
+        } else {
+          this.setPage("editweek");
+        }
       } else {
         console.log("Failed to update quiz");
       }
@@ -913,21 +1218,47 @@ Vue.createApp({
       let days = [];
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
+      console.log("TEMP", this.tempRSW);
+      // this.rswSetups = this.tempRSW;
+      this.tempRSW = [];
+      for (let element of this.newWeekDay) {
+        console.log(element);
+        if (element.id === "") {
+          for (let rsw of element.rsw) {
+            console.log("FORLOOP RSW", rsw);
+            this.tempRSW.push({
+              workoutID: "",
+              rsw: {
+                reps: rsw.rsw.reps,
+                sets: rsw.rsw.sets,
+                weight: rsw.rsw.weight,
+              },
+            });
+          }
+        }
+      }
+      console.log("FORLOOPRSW", this.tempRSW);
+      this.rswSetups = this.tempRSW;
+      console.log(this.rswSetups);
+      let index = 0;
       for (let element of this.newWeekDay) {
         console.log(element.id);
         console.log(element);
+
         console.log(element.id === "");
         if (element.id === "") {
           this.newDay.name = element.name;
-          // this.newDay.name.push(element.name);
           for (let id of element.workout) {
+            console.log("FORLOOPID", id);
             this.newDay.workouts.push(id.work);
+            this.rswSetups[index].workoutID = id.work;
+            console.log("RSW", this.rswSetups);
+            index++;
           }
           //
           // end of second loop
           //
-
+          console.log(this.newDay);
           let requestOptions = {
             method: "POST",
             headers: myHeaders,
@@ -972,20 +1303,31 @@ Vue.createApp({
       console.log(weekID);
       let response = await fetch(`${URL}/weeks/${weekID}`, requestOptions);
       if (response.status === 204) {
+        await this.makeRSW();
         this.getDays();
         this.clearEditDay();
         this.cleareditWeek();
-        this.clearday();
       } else {
         console.log("Failed to update week");
       }
     },
+    // when people get off of edit make sure to clear the feilds to the defualt
     cleareditWeek: function () {
       this.currentWeek = [];
       this.newWeekDay = [];
     },
     removeWEEKDAy: function (index) {
       this.newWeekDay.splice(index, 1);
+    },
+    clearAll: function () {
+      this.clearEditDay();
+      this.clearRSW();
+      this.clearWeek();
+      this.clearday();
+      this.cleareditWeek();
+    },
+    random: function () {
+      this.randomNum = Math.floor(Math.random() * this.workouts.length);
     },
   },
   computed: {
@@ -1023,6 +1365,7 @@ Vue.createApp({
     this.getDays();
     this.getWeeks();
     this.getSession();
+    this.random();
   },
 })
   .use(vuetify)
