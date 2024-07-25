@@ -11,7 +11,6 @@ Vue.createApp({
       workouts: [],
       days: [],
       weeks: [],
-      randomNum: 0,
       currentPage: "Browse",
       user: {
         name: "",
@@ -57,17 +56,7 @@ Vue.createApp({
       editingday: [],
       editingdayWorkouts: [],
       warning: 0,
-      rswSetups: [
-        {
-          workoutID: "",
-          rsw: {
-            reps: 0,
-            sets: 0,
-            weight: 0,
-          },
-          amount: 1,
-        },
-      ],
+      rswSetups: [],
       inputRWS: {
         workoutID: "",
         rsw: {
@@ -77,10 +66,9 @@ Vue.createApp({
         },
         amount: 1,
       },
-
-      rswSET: [
+      checkers: [
         {
-          input: "RSW",
+          checker: true,
         },
       ],
       personalWeeks: [],
@@ -109,19 +97,31 @@ Vue.createApp({
       instructionsRandomDay: "",
       randomNumDay: 0,
       instructions: "",
+      newPersonalWeek: {
+        name: "",
+        description: "",
+        days: [],
+      },
+      newPersonalDay: [],
+      personalModalOpen: true,
+      personalModal: {
+        name: "",
+        workout: [],
+        id: "",
+        show: false,
+      },
+      editingPersonalDay: [],
+      editingPersonalDayWorkouts: [],
+      personalDayIndex: -1,
+      personalDayArray: [],
+      modalDay: {},
+      newEditPersonal: [],
     };
   },
   methods: {
     addRSW: function (index) {
-      this.rswSetups.push({
-        workoutID: "",
-        rsw: {
-          reps: 0,
-          sets: 0,
-          weight: 0,
-        },
-        amount: 1,
-      });
+      this.rswSetups.push(this.inputRWS);
+      this.checkers[index].checker = false;
     },
     // addRSWweek: function () {
     //   if (this.flag > 0) {
@@ -304,8 +304,6 @@ Vue.createApp({
         workout: [],
         id: "",
         show: true,
-        set: [],
-        rsw: [],
       });
     },
     toggleModal: function () {
@@ -334,9 +332,7 @@ Vue.createApp({
         alert("Please enter a day");
       }
     },
-    changeTEMP: function () {
-      this.temp = 1;
-    },
+
     makeWorkout: function (index) {
       console.log(this.newWeekDay);
       console.log(index);
@@ -345,34 +341,6 @@ Vue.createApp({
         searchInput: "",
         filterWorkout: [],
       });
-      if (this.temp === 0) {
-        this.rswSET.push({
-          input: "RSW",
-        });
-      } else {
-        // if (this.newWeekDay[index].rsw.length === 1) {
-        // this.bol = false;
-        // this.newWeekDay[index].rsw.push("HELLO");
-
-        // }
-        // if (this.bol) {
-        this.newWeekDay[index].set.push({
-          input: "RSW",
-        });
-        this.newWeekDay[index].rsw.push({
-          workoutID: "",
-          rsw: {
-            reps: 0,
-            sets: 0,
-            weight: 0,
-          },
-          amount: 1,
-        });
-        // } else {
-        // this.bol = true;
-        // }
-      }
-      // this.temp = 0;
     },
     // Page switch
     setPage: function (page) {
@@ -389,25 +357,16 @@ Vue.createApp({
         searchInput: "",
         filterWorkout: [],
       });
-
-      this.rswSET.push({
-        input: "RSW",
+      this.checkers.push({
+        checker: true,
       });
     },
     removeWorkout: function (index) {
       this.newWorkout.splice(index, 1);
-      this.rswSET.splice(index, 1);
-      this.rswSetups.splice(index, 1);
-      console.log(this.rswSetups);
-      console.log(this.rswSET);
     },
     removeWorkoutWeek: function (day, index) {
       console.log(day);
       day.workout.splice(index, 1);
-      day.set.splice(index, 1);
-      day.rsw.splice(index, 1);
-      this.rswSET.splice(index, 1);
-      this.rswSetups.splice(index, 1);
       console.log(day.workout);
       console.log(this.newWeekDay);
     },
@@ -416,12 +375,9 @@ Vue.createApp({
     },
     createDay: async function () {
       let myHeaders = new Headers();
-      let index = 0;
       myHeaders.append("Content-Type", "application/json");
       this.newWorkout.forEach((element) => {
         this.newDay.workouts.push(element.work);
-        this.rswSetups[index].workoutID = element.work;
-        index++;
       });
       let requestOptions = {
         method: "POST",
@@ -434,38 +390,16 @@ Vue.createApp({
         this.getDays();
         this.clearday();
         this.currentPage = "Browse";
-        await this.makeRSW();
         console.log("Succesfully created");
       } else {
         console.log("Failed");
       }
     },
-
     createWeekdays: async function () {
       let days = [];
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      this.tempRSW = [];
-      console.log(this.newWeekDay);
-      for (let element of this.newWeekDay) {
-        console.log("Day", element);
-        if (element.id === "") {
-          for (let rsw of element.rsw) {
-            console.log("RSW", rsw);
-            this.tempRSW.push({
-              workoutID: "",
-              rsw: {
-                reps: rsw.rsw.reps,
-                sets: rsw.rsw.sets,
-                weight: rsw.rsw.weight,
-              },
-            });
-          }
-        }
-      }
-      this.rswSetups = this.tempRSW;
-      console.log("DONERSW", this.rswSetups);
-      let index = 0;
+
       for (let element of this.newWeekDay) {
         console.log(element.id);
         console.log(element);
@@ -475,9 +409,6 @@ Vue.createApp({
           // this.newDay.name.push(element.name);
           for (let id of element.workout) {
             this.newDay.workouts.push(id.work);
-            this.rswSetups[index].workoutID = id.work;
-            console.log("rswSetups", this.rswSetups);
-            index++;
           }
           //
           // end of second loop
@@ -489,7 +420,9 @@ Vue.createApp({
             body: JSON.stringify(this.newDay),
           };
           let response = await fetch(`${URL}/days`, requestOptions);
+
           let data = await response.json();
+          console.log("data", data);
           console.log("ID", data._id);
 
           days.push(data._id.toString());
@@ -528,7 +461,6 @@ Vue.createApp({
       let response = await fetch(`${URL}/weeks`, requestOptions);
       console.log(response);
       if (response.status === 201) {
-        this.makeRSW();
         this.getDays();
         this.getWeeks();
         this.clearday();
@@ -651,6 +583,9 @@ Vue.createApp({
       }
       this.getDays();
       this.getWeeks();
+      if (this.currentUser != {}) {
+        this.getPersonalWeek(this.currentUser.userID);
+      }
     },
     deleteSession: async function () {
       let requestOptions = {
@@ -940,7 +875,6 @@ Vue.createApp({
         };
         newDay.id = element._id;
         newDay.name = element.name;
-
         this.newWeekDay.push(newDay);
       }
     },
@@ -977,11 +911,142 @@ Vue.createApp({
       }
     },
 
-    getPersonalWeek: async function (weekID) {
-      let res = await fetch(`${URL}/personal/${weekID}`);
+    getPersonalWeek: async function (userID) {
+      let res = await fetch(`${URL}/personal/${userID}`);
       let data = await res.json();
       console.log(res);
       this.personalWeeks = data;
+
+      for (let element of this.personalWeeks) {
+        for (let newEl of element.days) {
+          this.personalDayArray.push(newEl);
+        }
+      }
+    },
+
+    splicePersonalDay: async function (week, weekID, index) {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      console.log(week);
+      week.days.splice(index, 1);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(week),
+      };
+
+      let res = await fetch(`${URL}/personal/${weekID}`, requestOptions);
+
+      if (res.status === 201) {
+        console.log("day removed");
+      } else {
+        console.log("failed to remove day");
+      }
+    },
+
+    deletePersonalWeek: async function (weekID) {
+      requestOptions = {
+        method: "DELETE",
+      };
+
+      let res = await fetch(`${URL}/personal/${weekID}`, requestOptions);
+      if (res.status === 204) {
+        console.log("Week has been removed");
+        this.getPersonalWeek(this.currentUser.userID);
+      } else {
+        console.log("Failed to remove week");
+      }
+    },
+
+    editPersonalWeek: async function (week) {
+      this.newPersonalWeek = week;
+      this.newPersonalDay = week.days;
+      console.log("Week", this.newPersonalWeek);
+      console.log("Day", this.newPersonalDay);
+      this.currentPage = "editPersonalWeek";
+    },
+
+    updatePersonalWeek: async function () {
+      let myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      this.newPersonalWeek.days = this.newPersonalDay;
+
+      for (let day of this.newEditPersonal) {
+        console.log("REMEBER THIS IS THE DAY", day);
+        let emptyArray = [];
+        for (let workout of day.workouts) {
+          emptyArray.push(workout.work);
+        }
+        day.workouts = emptyArray;
+      }
+      for (let day of this.newEditPersonal) {
+        this.newPersonalWeek.days.push(day);
+      }
+
+      // console.log(this.personalDayArray);
+      console.log("PLEASE WORK", this.newPersonalWeek);
+
+      let requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+        body: JSON.stringify(this.newPersonalWeek),
+      };
+
+      let res = await fetch(
+        `${URL}/personal/${this.newPersonalWeek._id}`,
+        requestOptions
+      );
+
+      if ((res.status = 201)) {
+        console.log("Week updated");
+        this.getPersonalWeek(this.currentUser.userID);
+        this.clearAll();
+      } else {
+        console.log("Failed to update week");
+      }
+    },
+    togglePersonalModal: function () {
+      this.personalModalOpen = !this.personalModalOpen;
+    },
+
+    editPersonalDay: async function (weekID, index) {
+      this.personalDayIndex = index;
+      this.currentPage = "editPersonalDay";
+      this.editingPersonalDay = this.newPersonalDay[index];
+      for (let element of this.editingPersonalDay.workouts) {
+        this.editingPersonalDayWorkouts.push({
+          searchInput: "",
+          work: element._id,
+        });
+      }
+    },
+
+    updatePersonalWorkDay: function (index) {
+      this.editingPersonalDayWorkouts.push({
+        searchInput: "",
+        work: "",
+      });
+    },
+
+    clearPersonalWeek: function () {
+      this.editingPersonalDay = [];
+      this.editingPersonalDayWorkouts = [];
+      this.newPersonalDay = [];
+    },
+
+    savePersonalDay: async function (index) {
+      this.newPersonalDay[this.personalDayIndex].workouts = [];
+      for (let element of this.editingPersonalDayWorkouts) {
+        this.newPersonalDay[this.personalDayIndex].workouts.push(element.work);
+      }
+    },
+
+    splicePersonalWorkout: function (index) {
+      this.editingPersonalDayWorkouts.splice(index, 1);
+      console.log(this.editingPersonalDayWorkouts);
     },
 
     addworkoutDayEdit: function (index) {
@@ -989,15 +1054,63 @@ Vue.createApp({
         searchInput: "",
         work: "",
       });
-      this.rswSET.push({
-        input: "RSW",
+    },
+
+    pushPersonalDay: function () {
+      console.log(this.modalDay);
+      this.newPersonalDay.push(this.modalDay);
+      console.log(this.editingPersonalDay);
+    },
+
+    addPersonalDay: function () {
+      this.newEditPersonal.push({
+        name: "",
+        workouts: [],
       });
+      console.log("add personal day", this.newPersonalDay);
+    },
+
+    makePersonalWorkout: async function (index) {
+      this.newEditPersonal[index].workouts.push({
+        work: "",
+        searchInput: "",
+        filterWorkout: [],
+      });
+      console.log(this.newPersonalDay[index]);
+    },
+
+    removePersonalDayWeek: function (index) {
+      this.newEditPersonal.splice(index, 1);
+    },
+
+    removePersonalWorkoutWeek: function (day, index) {
+      day.workouts.splice(index, 1);
+    },
+
+    clearAll: async function () {
+      this.personalWeeks = [];
+      this.newPersonalWeek = {
+        name: "",
+        description: "",
+        days: [],
+      };
+      (this.newPersonalDay = []), (this.personalModalOpen = true);
+      this.personalModal = {
+        name: "",
+        workout: [],
+        id: "",
+        show: false,
+      };
+      this.editingPersonalDay = [];
+      this.editingPersonalDayWorkouts = [];
+      this.personalDayIndex = -1;
+      this.personalDayArray = [];
+      this.modalDay = {};
+      this.newEditPersonal = [];
     },
 
     removeDayWorkoutEdit: function (index) {
       this.editingdayWorkouts.splice(index, 1);
-      this.rswSetups.splice(index, 1);
-      this.rswSET.splice(index, 1);
       console.log(this.editingdayWorkouts);
     },
     editDay: async function (dayID) {
@@ -1005,80 +1118,35 @@ Vue.createApp({
       let response = await fetch(`${URL}/days/${dayID}`);
       this.editingday = await response.json();
       console.log("day", this.editingday);
-      let index = 0;
       for (let element of this.editingday.workouts) {
         this.editingdayWorkouts.push({
           searchInput: "",
           work: element._id,
         });
-        if (index > 0) {
-          this.rswSET.push({
-            input: "RSW",
-          });
-          this.addRSW();
-        }
-        if (element._id in this.currentUser.rsw) {
-          this.rswSetups[index].rsw.reps =
-            this.currentUser.rsw[element._id].reps;
-          this.rswSetups[index].rsw.sets =
-            this.currentUser.rsw[element._id].sets;
-          this.rswSetups[index].rsw.weight =
-            this.currentUser.rsw[element._id].weight;
-        }
-        if (
-          this.rswSetups[index].rsw.reps === 0 &&
-          this.rswSetups[index].rsw.sets === 0
-        ) {
-          this.rswSET[index].input = "time";
-        }
-        index++;
       }
       console.log(this.editingdayWorkouts);
-    },
-    edit: function (num) {
-      this.whichEdit = num;
     },
     clearEditDay: function () {
       this.editingday = [];
       this.editingdayWorkouts = [];
       this.warning = 0;
-      console.log("boi", this.editingday);
+      console.log(this.editingday);
       console.log(this.editingdayWorkouts);
     },
     UpdateWeekDay: async function () {
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      console.log("1", this.editingday);
-      console.log(this.editingdayWorkouts);
-      this.editingday.workouts = [];
-      let index = 0;
-      for (let element of this.editingdayWorkouts) {
-        this.rswSetups[index].workoutID = element.work;
-        this.editingday.workouts.push(element.work);
-        index++;
-      }
-      console.log("2", this.editingday);
-      console.log("hello");
+
       let requestOptions = {
         method: "PUT",
         headers: myHeaders,
         body: JSON.stringify(this.editingday),
       };
-      console.log("hello");
       let dayID = this.editingday._id;
-      console.log("ID", dayID);
       let response = await fetch(`${URL}/days/${dayID}`, requestOptions);
-      console.log(response);
       if (response.status === 204) {
         this.getDays();
         this.clearEditDay();
-        await this.makeRSW();
-        this.clearRSW();
-        if (this.whichEdit === 0) {
-          this.setPage("personal");
-        } else {
-          this.setPage("editweek");
-        }
       } else {
         console.log("Failed to update quiz");
       }
@@ -1091,47 +1159,21 @@ Vue.createApp({
       let days = [];
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-      console.log("TEMP", this.tempRSW);
-      // this.rswSetups = this.tempRSW;
-      this.tempRSW = [];
-      for (let element of this.newWeekDay) {
-        console.log(element);
-        if (element.id === "") {
-          for (let rsw of element.rsw) {
-            console.log("FORLOOP RSW", rsw);
-            this.tempRSW.push({
-              workoutID: "",
-              rsw: {
-                reps: rsw.rsw.reps,
-                sets: rsw.rsw.sets,
-                weight: rsw.rsw.weight,
-              },
-            });
-          }
-        }
-      }
-      console.log("FORLOOPRSW", this.tempRSW);
-      this.rswSetups = this.tempRSW;
-      console.log(this.rswSetups);
-      let index = 0;
+
       for (let element of this.newWeekDay) {
         console.log(element.id);
         console.log(element);
-
         console.log(element.id === "");
         if (element.id === "") {
           this.newDay.name = element.name;
+          // this.newDay.name.push(element.name);
           for (let id of element.workout) {
-            console.log("FORLOOPID", id);
             this.newDay.workouts.push(id.work);
-            this.rswSetups[index].workoutID = id.work;
-            console.log("RSW", this.rswSetups);
-            index++;
           }
           //
           // end of second loop
           //
-          console.log(this.newDay);
+
           let requestOptions = {
             method: "POST",
             headers: myHeaders,
@@ -1176,15 +1218,14 @@ Vue.createApp({
       console.log(weekID);
       let response = await fetch(`${URL}/weeks/${weekID}`, requestOptions);
       if (response.status === 204) {
-        await this.makeRSW();
         this.getDays();
         this.clearEditDay();
         this.cleareditWeek();
+        this.clearday();
       } else {
         console.log("Failed to update week");
       }
     },
-    // when people get off of edit make sure to clear the feilds to the defualt
     cleareditWeek: function () {
       this.currentWeek = [];
       this.newWeekDay = [];
