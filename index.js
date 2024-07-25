@@ -126,7 +126,7 @@ app.get("/workouts", async (request, response) => {
   try {
     let workout = await model.Workout.find();
     response.send(workout);
-    console.log(workout);
+    // console.log(workout);
   } catch (error) {
     console.log(error);
     response.status(500).send("Generic error");
@@ -256,13 +256,7 @@ app.delete("/session", function (request, response) {
   request.session.userID = undefined;
   response.status(204).send();
 });
-app.put("/session", AuthMiddleware, (request, response) => {
-  console.log("PUT Session body", request.session.rsw);
-  request.session.rsw = request.body.rsw;
-  console.log("output", request.session.rsw);
 
-  response.send(request.session);
-});
 app.post("/session", async (request, response) => {
   console.log("1");
   try {
