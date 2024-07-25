@@ -500,7 +500,12 @@ Dificulty
 
         </v-card>
         <div>workout</div>
+        <v-card><img src="" alt=""></v-card>
         <div>image</div>
+        <v-card>
+          Instructions:
+          <div>{{instructions}}</div>
+        </v-card>
         <div>instructions</div>
         <div class="workout-in-day" v-for="workout in currentDay.workouts">
           {{currentDay.name}} {{workout.name}} {{workout.primaryMuscles}}

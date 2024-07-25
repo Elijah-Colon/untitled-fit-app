@@ -108,6 +108,7 @@ Vue.createApp({
       bol: true,
       instructionsRandomDay: "",
       randomNumDay: 0,
+      instructions: "",
     };
   },
   methods: {
@@ -684,6 +685,19 @@ Vue.createApp({
       console.log(this.currentworkout);
       console.log(data);
       this.setPage("singleDay");
+      this.currentWorkoutInstructions();
+    },
+    setCurrentWorkout: function (index) {
+      this.currentworkout = this.currentDay.workouts[index];
+      this.currentWorkoutInstructions();
+    },
+    currentWorkoutInstructions: function () {
+      this.instructions = "";
+      console.log(this.currentworkout.instructions);
+      for (let element of this.currentworkout.instructions) {
+        this.instructions += element;
+      }
+      return this.instructions;
     },
 
     // Incriment and Timestamp code
@@ -1217,14 +1231,6 @@ Vue.createApp({
       return this.filteredWeeks.filter((week) => {
         return week.owner._id.toString() == this.currentUser.userID.toString();
       });
-    },
-    currentWorkoutInstructions: function () {
-      let string = "";
-      for (let element in this.currentworkout) {
-        string += element;
-      }
-      console.log(string);
-      return string;
     },
   },
 
