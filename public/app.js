@@ -107,6 +107,7 @@ Vue.createApp({
       flag: 0,
       bol: true,
       instructionsRandomDay: "",
+      randomNumDay: 0,
     };
   },
   methods: {
@@ -152,6 +153,8 @@ Vue.createApp({
           weight: 0,
         },
         amount: 1,
+        dayworktouts: "",
+        currentworkout: null,
       };
     },
     setRSW: function (option, index) {
@@ -268,6 +271,8 @@ Vue.createApp({
 
       let data = await response.json();
       this.workouts = data;
+      this.random();
+
       for (let string of this.workouts[this.randomNum].instructions) {
         this.instructionsRandomDay += string;
       }
@@ -278,6 +283,10 @@ Vue.createApp({
 
       let data = await response.json();
       this.days = data;
+      this.randomDay();
+      for (let string of this.days[this.randomNumDay].workouts) {
+        this.dayworktouts += string;
+      }
       console.log(data);
     },
     // Weeks
@@ -526,7 +535,22 @@ Vue.createApp({
         this.currentPage = "Browse";
         console.log("Succesfully created");
       } else {
+        for (let element of this.newWeek.days) {
+          await this.deleteDayFailed(element);
+        }
         console.log("Failed to create week");
+        this.clearRSW();
+      }
+    },
+    deleteDayFailed: async function (dayID) {
+      let requestOptions = {
+        method: "DELETE",
+      };
+      let response = await fetch(`${URL}/days/${dayID}`, requestOptions);
+      if (response.status === 204) {
+        console.log("DELETED FAILED WEEKDAY");
+      } else {
+        console.log("DID NOT WORK");
       }
     },
 
@@ -656,8 +680,10 @@ Vue.createApp({
       let response = await fetch(`${URL}/days/${dayID}`);
       let data = await response.json();
       this.currentDay = data;
-      this.currentPage = "singleDay";
+      this.currentworkout = this.currentDay.workouts[0];
+      console.log(this.currentworkout);
       console.log(data);
+      this.setPage("singleDay");
     },
 
     // Incriment and Timestamp code
@@ -1162,6 +1188,9 @@ Vue.createApp({
     random: function () {
       this.randomNum = Math.floor(Math.random() * this.workouts.length);
     },
+    randomDay: function () {
+      this.randomNumDay = Math.floor(Math.random() * this.days.length);
+    },
   },
   computed: {
     filteredDays: function () {
@@ -1189,6 +1218,14 @@ Vue.createApp({
         return week.owner._id.toString() == this.currentUser.userID.toString();
       });
     },
+    currentWorkoutInstructions: function () {
+      let string = "";
+      for (let element in this.currentworkout) {
+        string += element;
+      }
+      console.log(string);
+      return string;
+    },
   },
 
   created: function () {
@@ -1198,7 +1235,6 @@ Vue.createApp({
     this.getDays();
     this.getWeeks();
     this.getSession();
-    this.random();
   },
 })
   .use(vuetify)

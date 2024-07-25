@@ -116,3 +116,19 @@ nav {
   align-items: center;
   cursor: pointer;
 }
+
+.day {
+  display: flex;
+  flex-direction: row;
+}
+.workoutInputs {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.rsw {
+  display: flex;
+  flex-direction: row;
+}
